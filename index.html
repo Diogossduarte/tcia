@@ -255,6 +255,7 @@
         <div><label class="fld" for="pacSelect">Paciente</label><select id="pacSelect"></select></div>
         <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn btn-ghost" onclick="showPage('pac')">+ Cadastrar paciente</button></div>
       </div>
+      <div id="whisperMsg" class="hint" style="margin-top:10px"></div>
 
       <div class="rec-panel">
         <div class="timer" id="timer">00:00</div>
@@ -268,6 +269,10 @@
 
       <label class="fld" for="rawText" style="margin-top:16px">Texto captado (editável)</label>
       <textarea id="rawText" placeholder="A fala aparece aqui conforme a consulta acontece. Você pode editar antes de organizar."></textarea>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px">
+        <button id="btnPunct" class="btn btn-ghost" onclick="punctuate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg> Pontuar e revisar texto</button>
+        <span class="hint" style="margin:0">Insere pontuação, maiúsculas e parágrafos sem alterar as palavras.</span>
+      </div>
 
       <div class="divider"></div>
 
@@ -423,6 +428,7 @@ function logout(){ if(confirm('Deseja sair? A transcrição atual não salva ser
 
 /* ===== Microfone + Web Speech ===== */
 let currentStream=null, recognition=null, recState='idle', finalText='', savedSession=false;
+let mediaRecorder=null, recChunks=[];
 let micCtx=null, micMonitors=[], micRAF=null, micChosen='';
 async function openMicModal(){
   document.getElementById('micModal').style.display='flex';
@@ -543,26 +549,100 @@ function setState(state,customText){
   else if(state==='pause'){st.classList.add('paused');txt.textContent=customText||'Pausado';fab.classList.remove('live');bS.disabled=true;bP.disabled=false;bF.disabled=false;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Retomar';}
   else{txt.textContent=customText||'Parado';fab.classList.remove('live');bS.disabled=false;bP.disabled=true;bF.disabled=true;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar';}
 }
-async function startRec(){
+/* transcrição automática — modelo fixo, sem escolhas para o médico */
+const WHISPER_MODEL='Xenova/whisper-base';
+function currentEngine(){ return 'whisper'; }
+function loadEngineCfg(){ setWhisperMsg('A transcrição roda no seu dispositivo; o texto pontuado aparece ao finalizar a gravação.'); }
+function setWhisperMsg(t){ const el=document.getElementById('whisperMsg'); if(!el)return; el.style.display=t?'':'none'; el.textContent=t||''; }
+
+/* ==== Whisper local (transformers.js) ==== */
+let TF=null, whisperPipe=null, whisperPipeModel=null;
+async function loadTF(){ if(TF)return TF; setWhisperMsg('Carregando biblioteca de transcrição…'); TF=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'); return TF; }
+async function getWhisper(model){
+  if(whisperPipe&&whisperPipeModel===model)return whisperPipe;
+  const {pipeline}=await loadTF();
+  const device=(navigator.gpu?'webgpu':'wasm');
+  const short=model.split('/')[1];
+  const cb=p=>{ if(p&&p.progress!=null) setWhisperMsg('Baixando modelo '+short+'… '+Math.round(p.progress)+'% (só na primeira vez)'); };
+  setWhisperMsg('Preparando modelo '+short+'…');
+  try{ whisperPipe=await pipeline('automatic-speech-recognition',model,{device,progress_callback:cb}); }
+  catch(e){ whisperPipe=await pipeline('automatic-speech-recognition',model,{device:'wasm',progress_callback:cb}); }
+  whisperPipeModel=model; return whisperPipe;
+}
+async function blobToPCM(blob){
+  const buf=await blob.arrayBuffer();
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  const decoded=await ac.decodeAudioData(buf); try{ac.close();}catch(e){}
+  const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(decoded.duration*16000)),16000);
+  const src=off.createBufferSource(); src.buffer=decoded; src.connect(off.destination); src.start();
+  const rendered=await off.startRendering();
+  return rendered.getChannelData(0);
+}
+async function transcribeBlob(blob){
+  try{
+    const pipe=await getWhisper(WHISPER_MODEL);
+    setWhisperMsg('Transcrevendo áudio localmente…');
+    const pcm=await blobToPCM(blob);
+    const out=await pipe(pcm,{language:'portuguese',task:'transcribe',chunk_length_s:30,stride_length_s:5});
+    const text=(out&&out.text?out.text:'').trim();
+    const ta=document.getElementById('rawText'); ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+text; finalText=ta.value+' ';
+    setWhisperMsg(text?'Transcrição concluída.':'Nada foi reconhecido no áudio.');
+  }catch(e){ setWhisperMsg('Erro na transcrição local: '+e.message); }
+}
+
+/* ==== Dispatchers de gravação ==== */
+async function startRec(){ showPage('transc'); return currentEngine()==='whisper'?startWhisperRec():startLiveRec(); }
+function togglePause(){ return currentEngine()==='whisper'?togglePauseWhisper():togglePauseLive(); }
+async function finishRec(){ return currentEngine()==='whisper'?finishWhisperRec():finishLiveRec(); }
+
+/* ==== Modo ao vivo (Web Speech) ==== */
+async function startLiveRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('Este navegador não suporta reconhecimento de voz. Use o Google Chrome ou o Microsoft Edge.');return;}
-  showPage('transc');
+  if(!SR){alert('Este navegador não suporta reconhecimento de voz ao vivo. Use o Whisper local, ou Chrome/Edge.');return;}
   await holdStream(document.getElementById('micSelect').value);
   finalText=document.getElementById('rawText').value; if(finalText&&!finalText.endsWith(' '))finalText+=' ';
   savedSession=false;
   recognition=makeRecognition(); setState('rec');
   try{recognition.start();startTimer();}catch(e){setState('idle','Não iniciou');}
 }
-function togglePause(){
+function togglePauseLive(){
   if(recState==='rec'){ setState('pause'); pauseTimer(); if(recognition){try{recognition.stop();}catch(e){}} }
   else if(recState==='pause'){ setState('rec'); recognition=makeRecognition(); try{recognition.start();startTimer();}catch(e){} }
 }
-function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
-function finishRec(){
+function finishLiveRec(){
   const dur=timerSec; finishToIdle();
   if(saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
   resetTimer();
 }
+
+/* ==== Modo Whisper (gravar → transcrever) ==== */
+async function startWhisperRec(){
+  if(!window.MediaRecorder){alert('Este navegador não suporta gravação de áudio (MediaRecorder).');return;}
+  await holdStream(document.getElementById('micSelect').value);
+  if(!currentStream){toast('Não foi possível acessar o microfone');return;}
+  savedSession=false; recChunks=[];
+  try{ mediaRecorder=new MediaRecorder(currentStream); }catch(e){ toast('Falha ao iniciar gravação'); return; }
+  mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size)recChunks.push(e.data); };
+  mediaRecorder.start();
+  setState('rec','Gravando…');
+  setWhisperMsg('Gravando o áudio. A transcrição local roda ao clicar em Finalizar.');
+  startTimer();
+}
+function togglePauseWhisper(){
+  if(recState==='rec'){ setState('pause','Pausado'); pauseTimer(); if(mediaRecorder&&mediaRecorder.state==='recording')try{mediaRecorder.pause();}catch(e){} }
+  else if(recState==='pause'){ setState('rec','Gravando…'); if(mediaRecorder&&mediaRecorder.state==='paused')try{mediaRecorder.resume();}catch(e){} startTimer(); }
+}
+async function finishWhisperRec(){
+  const dur=timerSec;
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){ await new Promise(res=>{ mediaRecorder.onstop=res; try{mediaRecorder.stop();}catch(e){res();} }); }
+  recState='idle'; pauseTimer(); setState('idle');
+  if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;}
+  const blob=new Blob(recChunks,{type:(mediaRecorder&&mediaRecorder.mimeType)||'audio/webm'}); recChunks=[];
+  if(blob.size){ await transcribeBlob(blob); } else { setWhisperMsg('Nenhum áudio gravado.'); }
+  if(saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
+  resetTimer();
+}
+function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
 function fabToggle(){ showPage('transc'); if(recState==='idle')startRec(); else finishRec(); }
 
 /* ===== Sessão / Histórico ===== */
@@ -621,6 +701,21 @@ function renderPatients(){
 /* ===== Organizar ===== */
 function fillTplSelect(){const sel=document.getElementById('tplSelect');const prev=sel.value;sel.innerHTML='';const g=groupBySpec();Object.keys(g).sort().forEach(spec=>{const og=document.createElement('optgroup');og.label=spec;g[spec].forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;og.appendChild(o);});sel.appendChild(og);});if(prev)sel.value=prev;}
 function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textContent=text||'O resultado organizado aparece aqui.';b.classList.toggle('placeholder',!!ph||!text);}
+async function punctuate(){
+  const raw=document.getElementById('rawText').value.trim();
+  if(!raw){toast('Não há texto para pontuar');return;}
+  const key=store.get('cfg.key',''),model=store.get('cfg.model','claude-sonnet-5');
+  if(!key){toast('Configure a chave de API em Minha conta');showPage('account');return;}
+  const btn=document.getElementById('btnPunct'); const old=btn.innerHTML; btn.disabled=true; btn.innerHTML='Pontuando…';
+  const system='Você recebe uma transcrição de fala em português do Brasil, capturada sem pontuação. Sua tarefa é APENAS tornar o texto legível: adicione pontuação, acentuação, letras maiúsculas onde cabível e quebras de parágrafo. NÃO altere, adicione, remova, resuma ou reordene o conteúdo e as palavras — preserve exatamente o que foi dito. Corrija somente erros evidentes de reconhecimento de fala quando o sentido for inequívoco. Responda apenas com o texto pontuado, sem comentários.';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,system,messages:[{role:'user',content:raw}]})});
+    if(!res.ok){toast('Erro na API ('+res.status+')');return;}
+    const data=await res.json(); const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    if(out){ document.getElementById('rawText').value=out; finalText=out+' '; toast('Texto pontuado'); }
+  }catch(e){toast('Falha de conexão: '+e.message);}
+  finally{ btn.disabled=false; btn.innerHTML=old; }
+}
 async function organize(){
   const raw=document.getElementById('rawText').value.trim(); if(!raw){toast('Nada para organizar — capte a consulta primeiro');return;}
   const tpl=templates.find(t=>t.id===document.getElementById('tplSelect').value); if(!tpl){toast('Selecione um modelo');return;}
@@ -685,7 +780,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
 /* ===== Init ===== */
-fillTplSelect();fillPacSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();
+fillTplSelect();fillPacSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();loadEngineCfg();
 </script>
 </body>
 </html>
