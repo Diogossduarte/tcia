@@ -9,42 +9,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --purple:#6D34E4;
-    --purple-deep:#5A28C6;
-    --purple-soft:#F1ECFC;
+    --purple:#6D34E4;--purple-deep:#5A28C6;--purple-soft:#F1ECFC;
     --grad:linear-gradient(135deg,#7B3FE4 0%,#C13AA8 100%);
-    --bg:#F4F4F6;
-    --panel:#FFFFFF;
-    --line:#EAEAEE;
-    --line-2:#E2E2E8;
-    --ink:#191A20;
-    --muted:#6B6C76;
-    --muted-2:#9A9BA4;
-    --active:#ECEAF2;
-    --teal:#3FA9A0;
-    --rec:#E5484D;
-    --ok:#2E9E6B;
-    --radius:16px;
-    --radius-sm:11px;
-    --shadow:0 1px 2px rgba(20,20,30,.04),0 12px 30px rgba(20,20,30,.05);
+    --bg:#F4F4F6;--panel:#FFFFFF;--line:#EAEAEE;--line-2:#E2E2E8;
+    --ink:#191A20;--muted:#6B6C76;--muted-2:#9A9BA4;--active:#ECEAF2;
+    --teal:#3FA9A0;--rec:#E5484D;--amber:#D98A00;--ok:#2E9E6B;
+    --radius:16px;--radius-sm:11px;--shadow:0 1px 2px rgba(20,20,30,.04),0 12px 30px rgba(20,20,30,.05);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{
-    font-family:"Inter",system-ui,sans-serif;
-    color:var(--ink);background:var(--bg);
-    -webkit-font-smoothing:antialiased;display:flex;
-  }
+  body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;display:flex}
   h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
   button{font-family:inherit;cursor:pointer}
   a{color:var(--purple-deep)}
 
-  /* ================= SIDEBAR ================= */
-  .sidebar{
-    width:262px;min-width:262px;height:100vh;position:sticky;top:0;
-    background:var(--panel);border-right:1px solid var(--line);
-    display:flex;flex-direction:column;padding:16px 14px;
-  }
+  /* ===== SIDEBAR ===== */
+  .sidebar{width:264px;min-width:264px;height:100vh;position:sticky;top:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 14px;overflow-y:auto}
   .side-top{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 14px}
   .brand{display:flex;align-items:center;gap:9px}
   .brand .mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff}
@@ -55,41 +35,43 @@
   .side-icons button:hover{background:var(--bg);color:var(--ink)}
   .side-icons svg{width:18px;height:18px}
 
-  .new-btn{
-    all:unset;display:flex;align-items:center;justify-content:center;gap:8px;
-    background:var(--purple);color:#fff;font-weight:600;font-size:14px;
-    padding:12px;border-radius:12px;margin:2px 4px 16px;transition:background .15s;
-  }
+  .new-btn{all:unset;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--purple);color:#fff;font-weight:600;font-size:14px;padding:12px;border-radius:12px;margin:2px 4px 14px;transition:background .15s}
   .new-btn:hover{background:var(--purple-deep)}
   .new-btn svg{width:18px;height:18px}
 
+  /* mic block in sidebar */
+  .mic-side{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px;margin:0 4px 14px}
+  .mic-side .lbl{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .mic-side .lbl svg{width:14px;height:14px}
+  .mic-side select{width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 9px;outline:none}
+  .mic-side select:focus{border-color:var(--purple)}
+  .mic-side .permit{all:unset;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;font-size:12px;font-weight:600;color:var(--purple-deep);padding:7px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel)}
+  .mic-side .permit:hover{border-color:var(--purple)}
+  .mic-side .permit svg{width:14px;height:14px}
+
   .nav{display:flex;flex-direction:column;gap:2px}
-  .nav button{
-    all:unset;display:flex;align-items:center;gap:12px;
-    padding:11px 12px;border-radius:11px;color:var(--muted);
-    font-size:14px;font-weight:500;transition:background .15s,color .15s;
-  }
+  .nav button{all:unset;display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:var(--muted);font-size:14px;font-weight:500;transition:background .15s,color .15s}
   .nav button:hover{background:var(--bg);color:var(--ink)}
   .nav button.active{background:var(--active);color:var(--ink);font-weight:600}
   .nav button svg{width:19px;height:19px;flex:0 0 auto;stroke-width:1.7}
 
-  .spacer{flex:1}
-
+  .spacer{flex:1;min-height:14px}
   .side-foot{display:flex;flex-direction:column;gap:2px;padding-top:8px;border-top:1px solid var(--line);margin-top:8px}
   .foot-link{all:unset;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;color:var(--muted);font-size:13.5px;font-weight:500}
   .foot-link:hover{background:var(--bg);color:var(--ink)}
   .foot-link svg{width:18px;height:18px;stroke-width:1.7}
   .foot-link.exit{color:#C0433F}
   .foot-link.exit:hover{background:#FBECEB}
-
-  .profile{display:flex;align-items:center;gap:10px;padding:9px 10px;margin-top:4px;border-radius:12px}
+  .profile{all:unset;display:flex;align-items:center;gap:10px;padding:9px 10px;margin-top:4px;border-radius:12px;cursor:pointer}
   .profile:hover{background:var(--bg)}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;flex:0 0 auto}
   .profile .who{min-width:0}
   .profile .who b{font-size:13.5px;font-weight:600;display:block;line-height:1.2}
   .profile .who span{font-size:11.5px;color:var(--muted-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .profile .chev{margin-left:auto;color:var(--muted-2)}
+  .profile .chev svg{width:16px;height:16px}
 
-  /* ================= MAIN ================= */
+  /* ===== MAIN ===== */
   .main{flex:1;min-width:0;height:100vh;overflow-y:auto;padding:20px}
   .container{max-width:1040px;margin:0 auto}
   .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:6px 4px 18px;flex-wrap:wrap}
@@ -98,22 +80,17 @@
   .head-actions{display:flex;gap:10px;flex-wrap:wrap}
 
   .surface{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
-  .surface + .surface{margin-top:0}
   .divider{height:1px;background:var(--line);margin:22px -22px}
   .block-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px;margin-bottom:4px}
   .block-title .n{width:22px;height:22px;border-radius:7px;background:var(--purple-soft);color:var(--purple-deep);display:grid;place-items:center;font-size:12px;font-weight:700}
   .hint{color:var(--muted);font-size:12.5px;line-height:1.5;margin:6px 0 16px}
 
   label.fld{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
-  select,input[type=text],input[type=password],textarea{
-    width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel);
-    border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:11px 13px;outline:none;
-    transition:border-color .15s,box-shadow .15s;
-  }
+  select,input[type=text],input[type=email],input[type=tel],input[type=password],textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:11px 13px;outline:none;transition:border-color .15s,box-shadow .15s}
   select:focus,input:focus,textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(109,52,228,.14)}
   textarea{resize:vertical;line-height:1.6}
   .row{display:flex;gap:12px;flex-wrap:wrap}
-  .row>*{flex:1;min-width:180px}
+  .row>*{flex:1;min-width:170px}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:11px;padding:11px 16px;font-size:13.5px;font-weight:600;transition:background .15s,border-color .15s,opacity .15s}
   .btn svg{width:16px;height:16px}
@@ -121,20 +98,20 @@
   .btn-primary:hover{background:var(--purple-deep)}
   .btn-ghost{background:var(--panel);border-color:var(--line-2);color:var(--ink)}
   .btn-ghost:hover{border-color:var(--muted-2);background:var(--bg)}
-  .btn-rec{background:var(--rec);color:#fff}
-  .btn-rec:hover{filter:brightness(.94)}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn-rec{background:var(--rec);color:#fff}.btn-rec:hover{filter:brightness(.94)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
 
-  .mic-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
-  .mic-bar .grow{flex:1;min-width:220px}
-  .status{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted);padding:9px 13px;background:var(--bg);border:1px solid var(--line);border-radius:999px;margin-left:auto}
-  .dot{width:9px;height:9px;border-radius:50%;background:var(--muted-2)}
-  .status.live{color:var(--rec)}
-  .status.live .dot{background:var(--rec);animation:pulse 1.1s infinite}
+  /* record panel */
+  .rec-panel{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:4px}
+  .timer{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1;min-width:118px}
+  .rec-state{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .rec-state .dot{width:9px;height:9px;border-radius:50%;background:var(--muted-2)}
+  .rec-state.live{color:var(--rec)}.rec-state.live .dot{background:var(--rec);animation:pulse 1.1s infinite}
+  .rec-state.paused{color:var(--amber)}.rec-state.paused .dot{background:var(--amber)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .rec-btns{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
 
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
-  #rawText{min-height:190px;margin-top:16px}
+  #rawText{min-height:340px;margin-top:16px;font-size:14.5px}
 
   .sheet{border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;margin-top:6px}
   .sheet-head{background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -147,33 +124,34 @@
   .icon-btn svg{width:16px;height:16px}
   .icon-btn.danger:hover{color:var(--rec);background:#FBECEB}
 
-  details.cfg{margin-top:16px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel)}
-  details.cfg summary{cursor:pointer;padding:13px 15px;font-size:13px;font-weight:600;color:var(--muted);list-style:none;display:flex;align-items:center;gap:8px}
-  details.cfg summary::-webkit-details-marker{display:none}
-  details.cfg[open] summary{border-bottom:1px solid var(--line)}
-  details.cfg .cfg-body{padding:15px}
   .note{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:9px;padding:11px 13px;line-height:1.55;margin-top:14px}
-
-  /* templates */
   .search{position:relative;margin-bottom:18px}
   .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted-2)}
   .search input{padding-left:42px}
-  .tpl-group{margin-bottom:22px}
-  .tpl-group>h3{font-size:14px;display:flex;align-items:center;gap:9px;margin-bottom:11px}
-  .tpl-group>h3 .badge{font-size:11px;font-weight:600;color:var(--purple-deep);background:var(--purple-soft);padding:2px 9px;border-radius:999px}
-  .tpl{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s}
-  .tpl:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
-  .tpl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .tpl-top .lead{display:flex;align-items:center;gap:12px;min-width:0}
-  .tpl-top .ava{width:38px;height:38px;border-radius:10px;background:var(--purple-soft);color:var(--purple-deep);display:grid;place-items:center;flex:0 0 auto}
-  .tpl-top .ava svg{width:18px;height:18px}
-  .tpl-top b{font-size:14.5px}
-  .tpl .secs{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px}
-  .tpl .secs span{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
-  .empty{border:1px dashed var(--line-2);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13.5px}
 
-  /* FAB */
-  .fab{position:fixed;right:26px;bottom:26px;width:56px;height:56px;border:none;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(140,60,180,.4);z-index:40;transition:transform .15s,filter .15s}
+  /* list cards (patients / history / templates) */
+  .item{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s}
+  .item:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
+  .item-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .item-lead{display:flex;align-items:center;gap:12px;min-width:0}
+  .ava{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;font-weight:700;font-size:13px}
+  .ava.p{background:var(--teal);color:#fff}
+  .ava.t{background:var(--purple-soft);color:var(--purple-deep)}
+  .ava.h{background:var(--purple-soft);color:var(--purple-deep)}.ava.h svg{width:18px;height:18px}
+  .item-lead .txt{min-width:0}
+  .item-lead b{font-size:14.5px;display:block}
+  .item-lead small{font-size:12px;color:var(--muted-2);display:block;margin-top:2px}
+  .item-actions{display:flex;align-items:center;gap:4px}
+  .secs{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px}
+  .secs span{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
+  .hist-body{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+  .item.open .hist-body{display:block}
+  .hist-body h4{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
+  .hist-body pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.65;margin:0 0 14px;color:var(--ink)}
+  .empty{border:1px dashed var(--line-2);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13.5px}
+  .chip{font-size:11.5px;font-weight:600;color:var(--purple-deep);background:var(--purple-soft);padding:3px 9px;border-radius:999px}
+
+  .fab{position:fixed;right:26px;bottom:26px;width:56px;height:56px;border:none;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(140,60,180,.4);z-index:40;transition:transform .15s}
   .fab:hover{transform:translateY(-2px)}
   .fab svg{width:24px;height:24px}
   .fab.live{background:var(--rec);box-shadow:0 8px 22px rgba(229,72,77,.45);animation:pulse 1.1s infinite}
@@ -181,375 +159,533 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  @media (max-width:780px){
+  @media (max-width:820px){
     body{flex-direction:column}
-    .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;padding:10px;flex-wrap:wrap;gap:6px;border-right:none;border-bottom:1px solid var(--line)}
-    .new-btn{margin:0}.nav{flex-direction:row}.spacer{flex:0}.side-foot{border:none;margin:0;padding:0}.side-icons{display:none}.profile .who{display:none}
-    .divider{margin:22px -22px}
+    .sidebar{width:100%;height:auto;position:static;flex-direction:column;border-right:none;border-bottom:1px solid var(--line)}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   :focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+
+  /* mic button + modal */
+  .mic-btn{all:unset;display:flex;align-items:center;gap:9px;width:100%;box-sizing:border-box;padding:9px 10px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
+  .mic-btn:hover{border-color:var(--purple)}
+  .mic-btn svg{width:15px;height:15px;color:var(--purple-deep);flex:0 0 auto}
+  .mic-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,20,30,.45);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:480px;padding:22px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:92vh;overflow-y:auto}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .mh-title{display:flex;align-items:center;gap:11px;font-size:20px;font-weight:700}
+  .mh-title svg{width:22px;height:22px}
+  .modal-x{all:unset;cursor:pointer;color:var(--muted-2);padding:4px;border-radius:8px;display:grid;place-items:center}
+  .modal-x:hover{background:var(--bg);color:var(--ink)}.modal-x svg{width:22px;height:22px}
+  .modal-sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .mic-devlist{display:flex;flex-direction:column;gap:10px}
+  .mic-loading{color:var(--muted);font-size:13.5px;padding:16px;text-align:center}
+  .devcard{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line-2);border-radius:13px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s}
+  .devcard:hover{border-color:var(--muted-2)}
+  .devcard.sel{border-color:var(--purple);background:var(--purple-soft)}
+  .devcard.static{cursor:default}
+  .dev-ic{flex:0 0 auto;color:var(--muted-2)}
+  .dev-ic svg{width:24px;height:24px}
+  .dev-ic.active{color:#2E9E6B}
+  .dev-ic.silent{color:var(--rec)}
+  .dev-txt{flex:1;min-width:0}
+  .dev-txt b{font-size:16px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dev-txt small{font-size:13px;color:var(--muted);display:block;margin-top:1px}
+  .meter{display:inline-flex;gap:3px;align-items:center;height:22px;flex:0 0 auto}
+  .meter i{width:5px;height:18px;border-radius:2px;background:#E4E4EA}
+  .meter i.on{background:#34C759}
+  .mic-sel-sep{height:1px;background:var(--line);margin:18px 0}
+  .mic-sel-label{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .remember{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);margin:18px 0;cursor:pointer;user-select:none}
+  .remember input{width:18px;height:18px;accent-color:var(--purple);cursor:pointer}
+  .modal-actions{display:flex;gap:12px}
+  .modal-actions .btn{flex:1;padding:13px;font-size:15px;border-radius:12px}
 </style>
 </head>
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
   <div class="side-top">
     <div class="brand">
       <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
       <b>anamnese</b>
     </div>
-    <div class="side-icons">
-      <button title="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></button>
-      <button title="Painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
-    </div>
+    <div class="side-icons"><button title="Painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button></div>
   </div>
 
-  <button class="new-btn" onclick="newConsult()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-    Nova transcrição
-  </button>
+  <button class="new-btn" onclick="newConsult()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Nova transcrição</button>
+
+  <div class="mic-side">
+    <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Microfone</div>
+    <button class="mic-btn" onclick="openMicModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="micBtnLabel">Selecionar microfone</span></button>
+    <select id="micSelect" style="display:none"></select>
+  </div>
 
   <nav class="nav">
-    <button id="nav-transc" class="active" onclick="showPage('transc')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-      Transcrição
-    </button>
-    <button id="nav-tpl" onclick="showPage('tpl')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
-      Modelos de anamnese
-    </button>
+    <button id="nav-transc" class="active" onclick="showPage('transc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Transcrição</button>
+    <button id="nav-hist" onclick="showPage('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg> Histórico</button>
+    <button id="nav-pac" onclick="showPage('pac')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M17 11h4m-2-2v4"/></svg> Pacientes</button>
   </nav>
 
   <div class="spacer"></div>
-
   <div class="side-foot">
-    <button class="foot-link" onclick="showPage('transc')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-      Ajuda e suporte
+    <button class="foot-link" onclick="showPage('account')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> Ajuda e suporte</button>
+    <button class="foot-link exit" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 12H4m0 0 4-4m-4 4 4 4M9 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9"/></svg> Sair</button>
+    <button class="profile" onclick="showPage('account')">
+      <div class="avatar" id="sideAvatar">AN</div>
+      <div class="who"><b id="sideName">Minha conta</b><span id="sideEmail">Ver dados</span></div>
+      <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg></div>
     </button>
-    <button class="foot-link exit" onclick="logout()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 12H4m0 0 4-4m-4 4 4 4M9 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9"/></svg>
-      Sair
-    </button>
-    <div class="profile">
-      <div class="avatar">AN</div>
-      <div class="who"><b>Minha conta</b><span>Consultório</span></div>
-    </div>
   </div>
 </aside>
 
-<!-- ================= MAIN ================= -->
-<main class="main">
-  <div class="container">
+<!-- ===== MAIN ===== -->
+<main class="main"><div class="container">
 
-    <!-- ---------- PAGE: TRANSCRIÇÃO ---------- -->
-    <section id="page-transc">
-      <div class="page-head">
-        <div>
-          <h1>Transcrição</h1>
-          <p>Capte a entrevista clínica e organize o texto de acordo com o modelo de anamnese.</p>
-        </div>
-        <div class="head-actions">
-          <button class="btn btn-ghost" onclick="clearTranscript()">Limpar</button>
-          <button class="btn btn-primary" onclick="organize()">Organizar</button>
+  <!-- PAGE: TRANSCRIÇÃO -->
+  <section id="page-transc">
+    <div class="page-head"><div><h1>Transcrição</h1><p>Capte a entrevista clínica e organize o texto de acordo com o modelo de anamnese.</p></div></div>
+
+    <div class="surface">
+      <div class="block-title"><span class="n">1</span> Sessão</div>
+      <div class="row" style="margin-top:12px">
+        <div><label class="fld" for="pacSelect">Paciente</label><select id="pacSelect"></select></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn btn-ghost" onclick="showPage('pac')">+ Cadastrar paciente</button></div>
+      </div>
+
+      <div class="rec-panel">
+        <div class="timer" id="timer">00:00</div>
+        <div class="rec-state" id="recState"><span class="dot"></span><span id="recStateText">Parado</span></div>
+        <div class="rec-btns">
+          <button id="btnStart" class="btn btn-rec" onclick="startRec()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg> Iniciar</button>
+          <button id="btnPause" class="btn btn-ghost" onclick="togglePause()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar</button>
+          <button id="btnFinish" class="btn btn-ghost" onclick="finishRec()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Finalizar</button>
         </div>
       </div>
 
-      <div class="surface">
-        <div class="block-title"><span class="n">1</span> Captação de voz</div>
-        <p class="hint">A transcrição roda no próprio navegador, em pt-BR. Funciona melhor no Chrome ou Edge.</p>
+      <label class="fld" for="rawText" style="margin-top:16px">Texto captado (editável)</label>
+      <textarea id="rawText" placeholder="A fala aparece aqui conforme a consulta acontece. Você pode editar antes de organizar."></textarea>
 
-        <div class="mic-bar">
-          <div class="grow">
-            <label class="fld" for="micSelect">Microfone</label>
-            <select id="micSelect"><option value="">Permita o acesso para listar os microfones…</option></select>
-          </div>
-          <button class="btn btn-ghost" onclick="requestMics()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12a8 8 0 0 1 8-8V1l4 4-4 4V6a6 6 0 1 0 6 6"/></svg>
-            Permitir / atualizar
-          </button>
-          <div id="status" class="status"><span class="dot"></span><span id="statusText">Parado</span></div>
-        </div>
+      <div class="divider"></div>
 
-        <div class="toolbar">
-          <button id="btnStart" class="btn btn-rec" onclick="startRec()">
-            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>
-            Iniciar captação
-          </button>
-          <button id="btnStop" class="btn btn-ghost" onclick="stopRec()" disabled>
-            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-            Parar
-          </button>
-        </div>
-
-        <label class="fld" for="rawText" style="margin-top:16px">Texto captado (editável)</label>
-        <textarea id="rawText" placeholder="A fala aparece aqui conforme a consulta acontece. Você pode editar antes de organizar."></textarea>
-
-        <div class="divider"></div>
-
-        <div class="block-title"><span class="n">2</span> Organizar no modelo</div>
-        <p class="hint">Escolha o prontuário e estruture o texto captado nas seções da anamnese selecionada.</p>
-
-        <div class="row">
-          <div>
-            <label class="fld" for="tplSelect">Modelo de anamnese</label>
-            <select id="tplSelect"></select>
-          </div>
-          <div style="flex:0 0 auto;display:flex;align-items:flex-end">
-            <button id="btnOrg" class="btn btn-primary" onclick="organize()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-              Organizar de acordo com o prontuário
-            </button>
-          </div>
-        </div>
-
-        <div class="sheet" style="margin-top:18px">
-          <div class="sheet-head">
-            <b id="sheetTitle">Prontuário organizado</b>
-            <div style="display:flex;gap:4px">
-              <button class="icon-btn" title="Copiar" onclick="copyOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
-              <button class="icon-btn" title="Baixar .txt" onclick="downloadOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
-            </div>
-          </div>
-          <div id="sheetBody" class="sheet-body placeholder">O resultado organizado aparece aqui.</div>
-        </div>
-
-        <details class="cfg">
-          <summary>⚙️ Configuração do organizador (chave de API)</summary>
-          <div class="cfg-body">
-            <p class="hint" style="margin-top:0">A organização usa um modelo de linguagem. Cole sua chave da API Anthropic — fica salva apenas neste navegador e é usada direto do cliente.</p>
-            <div class="row">
-              <div style="flex:2"><label class="fld" for="apiKey">Chave da API (x-api-key)</label><input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" /></div>
-              <div><label class="fld" for="apiModel">Modelo</label><input type="text" id="apiModel" value="claude-sonnet-5" /></div>
-            </div>
-            <button class="btn btn-ghost" style="margin-top:12px" onclick="saveCfg()">Salvar configuração</button>
-            <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
-          </div>
-        </details>
-      </div>
-    </section>
-
-    <!-- ---------- PAGE: MODELOS ---------- -->
-    <section id="page-tpl" style="display:none">
-      <div class="page-head">
-        <div>
-          <h1>Modelos de anamnese</h1>
-          <p>Modelos organizados por especialidade. Cadastre novos definindo as seções da entrevista.</p>
-        </div>
-        <div class="head-actions">
-          <button class="btn btn-primary" onclick="focusNew()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Novo modelo
-          </button>
-        </div>
+      <div class="block-title"><span class="n">2</span> Organizar no modelo</div>
+      <p class="hint">Escolha o prontuário e estruture o texto captado nas seções da anamnese selecionada.</p>
+      <div class="row">
+        <div><label class="fld" for="tplSelect">Modelo de anamnese</label><select id="tplSelect"></select></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button id="btnOrg" class="btn btn-primary" onclick="organize()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Organizar de acordo com o prontuário</button></div>
       </div>
 
-      <div class="surface" id="newTpl">
-        <div class="block-title">Cadastrar novo modelo</div>
-        <p class="hint">Cada seção em uma linha. Elas viram os tópicos usados para organizar a transcrição.</p>
-        <div class="row">
-          <div>
-            <label class="fld" for="fSpec">Especialidade</label>
-            <input type="text" id="fSpec" placeholder="Ex.: Psiquiatria, Neurologia, Clínica Geral" list="specList" />
-            <datalist id="specList"></datalist>
+      <div class="sheet" style="margin-top:18px">
+        <div class="sheet-head"><b id="sheetTitle">Prontuário organizado</b>
+          <div style="display:flex;gap:4px">
+            <button class="icon-btn" title="Copiar" onclick="copyOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+            <button class="icon-btn" title="Baixar .txt" onclick="downloadOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
           </div>
-          <div><label class="fld" for="fName">Nome do modelo</label><input type="text" id="fName" placeholder="Ex.: Primeira consulta" /></div>
         </div>
-        <div style="margin-top:12px">
-          <label class="fld" for="fSecs">Seções (uma por linha)</label>
-          <textarea id="fSecs" style="min-height:130px" placeholder="Queixa principal&#10;História da doença atual&#10;Antecedentes pessoais&#10;Antecedentes familiares&#10;Exame físico&#10;Hipóteses diagnósticas&#10;Conduta"></textarea>
-        </div>
-        <button class="btn btn-primary" style="margin-top:14px" onclick="addTemplate()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          Adicionar modelo
-        </button>
+        <div id="sheetBody" class="sheet-body placeholder">O resultado organizado aparece aqui.</div>
       </div>
+    </div>
+  </section>
 
-      <div class="surface">
-        <div class="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-          <input type="text" id="tplSearch" placeholder="Buscar modelo ou especialidade…" oninput="renderTemplates()" />
-        </div>
-        <div id="tplList"></div>
+  <!-- PAGE: HISTÓRICO -->
+  <section id="page-hist" style="display:none">
+    <div class="page-head"><div><h1>Histórico</h1><p>Transcrições anteriores registradas por paciente.</p></div></div>
+    <div class="surface">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input type="text" id="histSearch" placeholder="Buscar por paciente…" oninput="renderHistory()" /></div>
+      <div id="histList"></div>
+    </div>
+  </section>
+
+  <!-- PAGE: PACIENTES -->
+  <section id="page-pac" style="display:none">
+    <div class="page-head"><div><h1>Pacientes</h1><p>Cadastre pacientes e acesse seus históricos.</p></div>
+      <div class="head-actions"><button class="btn btn-primary" onclick="document.getElementById('pacName').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Novo paciente</button></div>
+    </div>
+    <div class="surface">
+      <div class="block-title">Cadastrar paciente</div>
+      <p class="hint">Cadastro simplificado: informe o nome completo.</p>
+      <div class="row">
+        <div style="flex:3"><label class="fld" for="pacName">Nome completo</label><input type="text" id="pacName" placeholder="Ex.: Maria Aparecida da Silva" onkeydown="if(event.key==='Enter')addPatient()" /></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addPatient()">Cadastrar</button></div>
       </div>
-    </section>
+    </div>
+    <div class="surface">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input type="text" id="pacSearch" placeholder="Buscar paciente…" oninput="renderPatients()" /></div>
+      <div id="pacList"></div>
+    </div>
+  </section>
 
+  <!-- PAGE: MINHA CONTA -->
+  <section id="page-account" style="display:none">
+    <div class="page-head"><div><h1>Minha conta</h1><p>Seus dados, modelos de anamnese e configuração do organizador.</p></div></div>
+
+    <div class="surface">
+      <div class="block-title">Dados da conta</div>
+      <p class="hint">Usados na identificação da conta e do prontuário.</p>
+      <div class="row">
+        <div><label class="fld" for="accName">Nome</label><input type="text" id="accName" placeholder="Ex.: Dra. Ana Prado" /></div>
+        <div><label class="fld" for="accEmail">E-mail</label><input type="email" id="accEmail" placeholder="voce@clinica.com" /></div>
+        <div><label class="fld" for="accPhone">Telefone</label><input type="tel" id="accPhone" placeholder="(11) 90000-0000" /></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="saveAccount()">Salvar dados</button>
+    </div>
+
+    <div class="surface">
+      <div class="block-title">Modelos de anamnese</div>
+      <p class="hint">Cadastre ou edite modelos por especialidade. Cada seção em uma linha.</p>
+      <div class="row">
+        <div><label class="fld" for="fSpec">Especialidade</label><input type="text" id="fSpec" placeholder="Ex.: Psiquiatria" list="specList" /><datalist id="specList"></datalist></div>
+        <div><label class="fld" for="fName">Nome do modelo</label><input type="text" id="fName" placeholder="Ex.: Primeira consulta" /></div>
+      </div>
+      <div style="margin-top:12px"><label class="fld" for="fSecs">Seções (uma por linha)</label><textarea id="fSecs" style="min-height:120px" placeholder="Queixa principal&#10;História da doença atual&#10;Antecedentes&#10;Exame físico&#10;Hipóteses diagnósticas&#10;Conduta"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button id="tplSubmit" class="btn btn-primary" onclick="submitTemplate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Adicionar modelo</button>
+        <button id="tplCancel" class="btn btn-ghost" onclick="cancelEdit()" style="display:none">Cancelar edição</button>
+      </div>
+      <div style="margin-top:20px" id="tplList"></div>
+    </div>
+
+    <div class="surface">
+      <div class="block-title">Configuração do organizador (API)</div>
+      <p class="hint">A organização usa um modelo de linguagem. A chave fica salva apenas neste navegador e é usada direto do cliente.</p>
+      <div class="row">
+        <div style="flex:2"><label class="fld" for="apiKey">Chave da API (x-api-key)</label><input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" /></div>
+        <div><label class="fld" for="apiModel">Modelo</label><input type="text" id="apiModel" value="claude-sonnet-5" /></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="saveCfg()">Salvar configuração</button>
+      <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
+    </div>
+  </section>
+
+</div></main>
+
+<!-- ===== MODAL: SELECIONAR MICROFONE ===== -->
+<div id="micModal" class="modal-overlay" onclick="if(event.target===this)closeMicModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="mh-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Selecionar Microfone</div>
+      <button class="modal-x" onclick="closeMicModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="modal-sub" id="micCount">Procurando dispositivos…</div>
+    <div id="micDevList" class="mic-devlist"></div>
+    <div class="mic-sel-sep"></div>
+    <div class="mic-sel-label">Microfone selecionado:</div>
+    <div class="devcard sel static">
+      <span class="dev-ic active" id="micSelIc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+      <div class="dev-txt"><b id="micSelName">—</b><small id="micSelStatus">—</small></div>
+      <span class="meter" id="micSelMeter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    </div>
+    <label class="remember"><input type="checkbox" id="micRemember"> Lembrar minha escolha</label>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeMicModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmMic()">Confirmar</button>
+    </div>
   </div>
-</main>
+</div>
 
-<button id="fab" class="fab" title="Iniciar/parar captação" onclick="fabToggle()">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-</button>
-
+<button id="fab" class="fab" title="Iniciar/parar captação" onclick="fabToggle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
 <div id="toast" class="toast"></div>
 
 <script>
-/* ============ Persistência ============ */
-const mem = {};
-const store = {
-  get(k,def){ try{const v=localStorage.getItem(k);return v===null?def:JSON.parse(v);}catch(e){return k in mem?mem[k]:def;} },
-  set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){mem[k]=v;} }
-};
+/* ===== Persistência ===== */
+const mem={};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return k in mem?mem[k]:d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){mem[k]=v;}}};
 
-/* ============ Modelos padrão ============ */
-const SEED = [
-  { id:'seed-cg', spec:'Clínica Geral', name:'Anamnese geral', secs:['Identificação','Queixa principal','História da doença atual','Interrogatório sintomatológico','Antecedentes pessoais','Antecedentes familiares','Hábitos de vida','Exame físico','Hipóteses diagnósticas','Conduta'] },
-  { id:'seed-psq', spec:'Psiquiatria', name:'Avaliação psiquiátrica inicial', secs:['Identificação','Queixa principal','História da doença atual','Antecedentes psiquiátricos','História pessoal e social','Antecedentes familiares','Uso de substâncias','Medicações em uso','Exame do estado mental','Hipóteses diagnósticas (CID)','Conduta e plano terapêutico'] },
-  { id:'seed-neu', spec:'Neurologia', name:'Anamnese neurológica', secs:['Identificação','Queixa principal','História da doença atual','Antecedentes pessoais','Antecedentes familiares','Medicações em uso','Exame neurológico','Hipóteses diagnósticas','Exames complementares','Conduta'] },
+/* ===== Dados ===== */
+const SEED=[
+  {id:'seed-cg',spec:'Clínica Geral',name:'Anamnese geral',secs:['Identificação','Queixa principal','História da doença atual','Interrogatório sintomatológico','Antecedentes pessoais','Antecedentes familiares','Hábitos de vida','Exame físico','Hipóteses diagnósticas','Conduta']},
+  {id:'seed-psq',spec:'Psiquiatria',name:'Avaliação psiquiátrica inicial',secs:['Identificação','Queixa principal','História da doença atual','Antecedentes psiquiátricos','História pessoal e social','Antecedentes familiares','Uso de substâncias','Medicações em uso','Exame do estado mental','Hipóteses diagnósticas (CID)','Conduta e plano terapêutico']},
+  {id:'seed-neu',spec:'Neurologia',name:'Anamnese neurológica',secs:['Identificação','Queixa principal','História da doença atual','Antecedentes pessoais','Antecedentes familiares','Medicações em uso','Exame neurológico','Hipóteses diagnósticas','Exames complementares','Conduta']},
 ];
-let templates = store.get('tpl.v1', null);
-if(templates===null){ templates=SEED.slice(); store.set('tpl.v1',templates); }
-function saveTemplates(){ store.set('tpl.v1',templates); }
+let templates=store.get('tpl.v1',null); if(templates===null){templates=SEED.slice();store.set('tpl.v1',templates);}
+let patients=store.get('pac.v1',[]);
+let history=store.get('hist.v1',[]);
+let account=store.get('account.v1',{name:'',email:'',phone:''});
+function saveTemplates(){store.set('tpl.v1',templates);}
+function savePatients(){store.set('pac.v1',patients);}
+function saveHistory(){store.set('hist.v1',history);}
 
-/* ============ Navegação ============ */
+/* ===== Navegação ===== */
+const PAGES={transc:'page-transc',hist:'page-hist',pac:'page-pac',account:'page-account'};
 function showPage(p){
-  document.getElementById('page-transc').style.display = p==='transc'?'':'none';
-  document.getElementById('page-tpl').style.display    = p==='tpl'?'':'none';
-  document.getElementById('nav-transc').classList.toggle('active', p==='transc');
-  document.getElementById('nav-tpl').classList.toggle('active', p==='tpl');
-  if(p==='tpl') renderTemplates();
+  Object.entries(PAGES).forEach(([k,id])=>document.getElementById(id).style.display=k===p?'':'none');
+  ['transc','hist','pac'].forEach(k=>document.getElementById('nav-'+k).classList.toggle('active',k===p));
+  if(p==='hist')renderHistory();
+  if(p==='pac')renderPatients();
+  if(p==='account'){renderTemplates();loadAccount();loadCfg();}
   document.querySelector('.main').scrollTo(0,0);
 }
-function newConsult(){ showPage('transc'); clearTranscript(); setSheet('',true); document.getElementById('rawText').focus(); }
-function focusNew(){ document.getElementById('newTpl').scrollIntoView({behavior:'smooth'}); document.getElementById('fSpec').focus(); }
-function logout(){
-  if(confirm('Deseja sair? A transcrição atual não salva será perdida.')){
-    stopRec(); document.getElementById('rawText').value=''; setSheet('',true); toast('Sessão encerrada');
-  }
+function newConsult(){ archiveCurrent(); showPage('transc'); clearSession(); document.getElementById('rawText').focus(); }
+function logout(){ if(confirm('Deseja sair? A transcrição atual não salva será perdida.')){finishToIdle();clearSession();toast('Sessão encerrada');} }
+
+/* ===== Microfone + Web Speech ===== */
+let currentStream=null, recognition=null, recState='idle', finalText='', savedSession=false;
+let micCtx=null, micMonitors=[], micRAF=null, micChosen='';
+async function openMicModal(){
+  document.getElementById('micModal').style.display='flex';
+  document.getElementById('micDevList').innerHTML='<div class="mic-loading">Procurando dispositivos…</div>';
+  document.getElementById('micCount').textContent='Procurando dispositivos…';
+  const saved=store.get('mic.choice',null);
+  micChosen=saved?saved.id:(document.getElementById('micSelect').value||'');
+  document.getElementById('micRemember').checked=!!store.get('mic.remember',false);
+  try{ const p=await navigator.mediaDevices.getUserMedia({audio:true}); p.getTracks().forEach(t=>t.stop()); }
+  catch(e){ document.getElementById('micDevList').innerHTML='<div class="mic-loading">Permissão de microfone negada.</div>'; document.getElementById('micCount').textContent='0 dispositivos'; return; }
+  const devices=await navigator.mediaDevices.enumerateDevices();
+  const mics=devices.filter(d=>d.kind==='audioinput'&&d.deviceId);
+  document.getElementById('micCount').textContent=mics.length+' dispositivo'+(mics.length===1?'':'s')+' encontrado'+(mics.length===1?'':'s');
+  if(!micChosen&&mics[0]) micChosen=mics[0].deviceId;
+  buildDevList(mics); startMeters();
+}
+function makeMeterEl(){const m=document.createElement('span');m.className='meter';for(let i=0;i<10;i++)m.appendChild(document.createElement('i'));return m;}
+function setMeter(el,lit){const b=el.children;for(let i=0;i<b.length;i++)b[i].className=i<lit?'on':'';}
+function buildDevList(mics){
+  const list=document.getElementById('micDevList'); list.innerHTML=''; micMonitors=[];
+  if(!micCtx){try{micCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  mics.forEach((m,i)=>{
+    const name=m.label||('Microfone '+(i+1));
+    const card=document.createElement('div'); card.className='devcard'; card.dataset.id=m.deviceId; card.onclick=()=>selectDev(m.deviceId);
+    card.innerHTML='<span class="dev-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><div class="dev-txt"><b>'+esc(name)+'</b><small>Aguardando…</small></div>';
+    const meter=makeMeterEl(); card.appendChild(meter); list.appendChild(card);
+    const mon={id:m.deviceId,name,card,meter,statusEl:card.querySelector('small'),icEl:card.querySelector('.dev-ic'),level:0,lastActive:0,stream:null,analyser:null,data:null};
+    micMonitors.push(mon); startMonitor(mon);
+  });
+  updateSelectedUI();
+}
+async function startMonitor(mon){
+  try{
+    mon.stream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:mon.id}}});
+    const src=micCtx.createMediaStreamSource(mon.stream);
+    mon.analyser=micCtx.createAnalyser(); mon.analyser.fftSize=256; mon.data=new Uint8Array(mon.analyser.fftSize);
+    src.connect(mon.analyser);
+  }catch(e){ mon.statusEl.textContent='Indisponível'; }
+}
+function startMeters(){
+  cancelAnimationFrame(micRAF);
+  const loop=()=>{
+    micMonitors.forEach(mon=>{
+      if(mon.analyser){
+        mon.analyser.getByteTimeDomainData(mon.data);
+        let sum=0; for(let i=0;i<mon.data.length;i++){const x=(mon.data[i]-128)/128;sum+=x*x;}
+        const rms=Math.sqrt(sum/mon.data.length); mon.level=Math.min(1,rms*4);
+        if(rms>0.012)mon.lastActive=performance.now();
+        const active=performance.now()-mon.lastActive<1500;
+        setMeter(mon.meter,Math.round(mon.level*10));
+        mon.statusEl.textContent=active?'Captando áudio':'Sem áudio detectado';
+        mon.icEl.classList.toggle('active',active); mon.icEl.classList.toggle('silent',!active);
+      }
+    });
+    updateSelectedMeter();
+    micRAF=requestAnimationFrame(loop);
+  };
+  micRAF=requestAnimationFrame(loop);
+}
+function selectDev(id){ micChosen=id; updateSelectedUI(); }
+function updateSelectedUI(){
+  micMonitors.forEach(mon=>mon.card.classList.toggle('sel',mon.id===micChosen));
+  const mon=micMonitors.find(m=>m.id===micChosen);
+  document.getElementById('micSelName').textContent=mon?mon.name:'—';
+}
+function updateSelectedMeter(){
+  const mon=micMonitors.find(m=>m.id===micChosen); if(!mon)return;
+  setMeter(document.getElementById('micSelMeter'),Math.round(mon.level*10));
+  const active=performance.now()-mon.lastActive<1500;
+  document.getElementById('micSelStatus').textContent=active?'Captando áudio':'Sem áudio detectado';
+  const ic=document.getElementById('micSelIc'); ic.classList.toggle('active',active); ic.classList.toggle('silent',!active);
+}
+function confirmMic(){
+  if(!micChosen){toast('Selecione um microfone');return;}
+  const mon=micMonitors.find(m=>m.id===micChosen); const label=mon?mon.name:'Microfone';
+  const sel=document.getElementById('micSelect'); sel.innerHTML='<option value="'+esc(micChosen)+'">'+esc(label)+'</option>'; sel.value=micChosen;
+  document.getElementById('micBtnLabel').textContent=label;
+  const remember=document.getElementById('micRemember').checked;
+  store.set('mic.remember',remember);
+  store.set('mic.choice',remember?{id:micChosen,label}:null);
+  closeMicModal(); toast('Microfone selecionado');
+}
+function closeMicModal(){
+  cancelAnimationFrame(micRAF); micRAF=null;
+  micMonitors.forEach(mon=>{if(mon.stream)mon.stream.getTracks().forEach(t=>t.stop());});
+  micMonitors=[]; if(micCtx){try{micCtx.close();}catch(e){}micCtx=null;}
+  document.getElementById('micModal').style.display='none';
+}
+function applySavedMic(){
+  const saved=store.get('mic.choice',null); if(!saved)return;
+  const sel=document.getElementById('micSelect'); sel.innerHTML='<option value="'+esc(saved.id)+'">'+esc(saved.label)+'</option>'; sel.value=saved.id;
+  document.getElementById('micBtnLabel').textContent=saved.label;
+}
+async function holdStream(id){ if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} try{currentStream=await navigator.mediaDevices.getUserMedia({audio:id?{deviceId:{exact:id}}:true});}catch(e){} }
+function makeRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR(); r.lang='pt-BR'; r.continuous=true; r.interimResults=true;
+  r.onresult=(ev)=>{let interim='';for(let i=ev.resultIndex;i<ev.results.length;i++){const c=ev.results[i][0].transcript;if(ev.results[i].isFinal)finalText+=c+' ';else interim+=c;}const ta=document.getElementById('rawText');ta.value=finalText+interim;ta.scrollTop=ta.scrollHeight;};
+  r.onerror=(e)=>{if(e.error!=='no-speech')setState(recState,'Erro: '+e.error);};
+  r.onend=()=>{if(recState==='rec'){try{recognition.start();}catch(e){}}};
+  return r;
 }
 
-/* ============ Microfone + Web Speech ============ */
-let currentStream=null, recognizing=false, recognition=null, finalText='';
-async function requestMics(){
-  try{
-    const s=await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop());
-    const devices=await navigator.mediaDevices.enumerateDevices();
-    const mics=devices.filter(d=>d.kind==='audioinput');
-    const sel=document.getElementById('micSelect'); sel.innerHTML='';
-    if(!mics.length){ sel.innerHTML='<option value="">Nenhum microfone encontrado</option>'; return; }
-    mics.forEach((m,i)=>{ const o=document.createElement('option'); o.value=m.deviceId; o.textContent=m.label||('Microfone '+(i+1)); sel.appendChild(o); });
-    toast('Microfones carregados');
-  }catch(e){ toast('Permissão de microfone negada'); }
-}
-async function holdStream(deviceId){
-  if(currentStream){ currentStream.getTracks().forEach(t=>t.stop()); currentStream=null; }
-  try{ currentStream=await navigator.mediaDevices.getUserMedia({audio:deviceId?{deviceId:{exact:deviceId}}:true}); }catch(e){}
-}
-function setStatus(text,live){
-  document.getElementById('statusText').textContent=text;
-  document.getElementById('status').classList.toggle('live',!!live);
-  document.getElementById('fab').classList.toggle('live',!!live);
+/* ===== Timer ===== */
+let timerSec=0, timerInt=null;
+function renderTimer(){const m=String(Math.floor(timerSec/60)).padStart(2,'0');const s=String(timerSec%60).padStart(2,'0');document.getElementById('timer').textContent=m+':'+s;}
+function startTimer(){if(timerInt)return;timerInt=setInterval(()=>{timerSec++;renderTimer();},1000);}
+function pauseTimer(){clearInterval(timerInt);timerInt=null;}
+function resetTimer(){pauseTimer();timerSec=0;renderTimer();}
+
+/* ===== Estado da gravação ===== */
+function setState(state,customText){
+  recState=state;
+  const st=document.getElementById('recState'), txt=document.getElementById('recStateText'), fab=document.getElementById('fab');
+  st.classList.remove('live','paused');
+  const bS=document.getElementById('btnStart'),bP=document.getElementById('btnPause'),bF=document.getElementById('btnFinish');
+  if(state==='rec'){st.classList.add('live');txt.textContent=customText||'Gravando…';fab.classList.add('live');bS.disabled=true;bP.disabled=false;bF.disabled=false;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar';}
+  else if(state==='pause'){st.classList.add('paused');txt.textContent=customText||'Pausado';fab.classList.remove('live');bS.disabled=true;bP.disabled=false;bF.disabled=false;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Retomar';}
+  else{txt.textContent=customText||'Parado';fab.classList.remove('live');bS.disabled=false;bP.disabled=true;bF.disabled=true;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar';}
 }
 async function startRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ alert('Este navegador não suporta reconhecimento de voz. Use o Google Chrome ou o Microsoft Edge.'); return; }
+  if(!SR){alert('Este navegador não suporta reconhecimento de voz. Use o Google Chrome ou o Microsoft Edge.');return;}
+  showPage('transc');
   await holdStream(document.getElementById('micSelect').value);
-  recognition=new SR(); recognition.lang='pt-BR'; recognition.continuous=true; recognition.interimResults=true;
-  finalText=document.getElementById('rawText').value; if(finalText && !finalText.endsWith(' ')) finalText+=' ';
-  recognition.onresult=(ev)=>{
-    let interim='';
-    for(let i=ev.resultIndex;i<ev.results.length;i++){ const c=ev.results[i][0].transcript; if(ev.results[i].isFinal) finalText+=c+' '; else interim+=c; }
-    const ta=document.getElementById('rawText'); ta.value=finalText+interim; ta.scrollTop=ta.scrollHeight;
-  };
-  recognition.onerror=(e)=>{ if(e.error==='no-speech') return; setStatus('Erro: '+e.error,false); };
-  recognition.onend=()=>{ if(recognizing){ try{recognition.start();}catch(e){} } };
-  try{
-    recognition.start(); recognizing=true; setStatus('Gravando…',true);
-    document.getElementById('btnStart').disabled=true; document.getElementById('btnStop').disabled=false;
-  }catch(e){ setStatus('Não foi possível iniciar',false); }
+  finalText=document.getElementById('rawText').value; if(finalText&&!finalText.endsWith(' '))finalText+=' ';
+  savedSession=false;
+  recognition=makeRecognition(); setState('rec');
+  try{recognition.start();startTimer();}catch(e){setState('idle','Não iniciou');}
 }
-function stopRec(){
-  recognizing=false; if(recognition){ try{recognition.stop();}catch(e){} }
-  if(currentStream){ currentStream.getTracks().forEach(t=>t.stop()); currentStream=null; }
-  finalText=document.getElementById('rawText').value; setStatus('Parado',false);
-  document.getElementById('btnStart').disabled=false; document.getElementById('btnStop').disabled=true;
+function togglePause(){
+  if(recState==='rec'){ setState('pause'); pauseTimer(); if(recognition){try{recognition.stop();}catch(e){}} }
+  else if(recState==='pause'){ setState('rec'); recognition=makeRecognition(); try{recognition.start();startTimer();}catch(e){} }
 }
-function clearTranscript(){ document.getElementById('rawText').value=''; finalText=''; }
-function fabToggle(){ showPage('transc'); recognizing?stopRec():startRec(); }
+function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
+function finishRec(){
+  const dur=timerSec; finishToIdle();
+  if(saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
+  resetTimer();
+}
+function fabToggle(){ showPage('transc'); if(recState==='idle')startRec(); else finishRec(); }
 
-/* ============ Organizar ============ */
-function fillTplSelect(){
-  const sel=document.getElementById('tplSelect'); const prev=sel.value; sel.innerHTML='';
-  const g=groupBySpec();
-  Object.keys(g).sort().forEach(spec=>{ const og=document.createElement('optgroup'); og.label=spec;
-    g[spec].forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=t.name; og.appendChild(o); }); sel.appendChild(og); });
-  if(prev) sel.value=prev;
+/* ===== Sessão / Histórico ===== */
+function clearSession(){ document.getElementById('rawText').value=''; finalText=''; setSheet('',true); document.getElementById('sheetTitle').textContent='Prontuário organizado'; resetTimer(); savedSession=false; }
+function saveToHistory(dur){
+  const raw=document.getElementById('rawText').value.trim(); if(!raw)return false;
+  const sheet=document.getElementById('sheetBody'); const organized=sheet.classList.contains('placeholder')?'':sheet.textContent;
+  const pid=document.getElementById('pacSelect').value; const pname=pid?(patients.find(p=>p.id===pid)?.name||'—'):'Não vinculado';
+  const tpl=document.getElementById('sheetTitle').textContent; const tName=tpl!=='Prontuário organizado'?tpl:'';
+  history.unshift({id:'h'+Date.now(),patientId:pid,patientName:pname,date:new Date().toISOString(),durationSec:dur||0,template:tName,raw,organized});
+  saveHistory(); return true;
 }
-function setSheet(text,placeholder){
-  const b=document.getElementById('sheetBody'); b.textContent=text||'O resultado organizado aparece aqui.'; b.classList.toggle('placeholder',!!placeholder||!text);
+function archiveCurrent(){ if(recState!=='idle')finishToIdle(); const raw=document.getElementById('rawText').value.trim(); if(raw&&!savedSession){ if(saveToHistory(timerSec)){savedSession=true;toast('Transcrição anterior registrada no histórico');} } }
+function fmtDate(iso){const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function fmtDur(s){const m=Math.floor(s/60),ss=s%60;return m+'min '+String(ss).padStart(2,'0')+'s';}
+function renderHistory(){
+  const q=(document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const wrap=document.getElementById('histList'); wrap.innerHTML='';
+  let list=history; if(q)list=history.filter(h=>(h.patientName+' '+h.template).toLowerCase().includes(q));
+  if(!list.length){wrap.innerHTML='<div class="empty">'+(q?'Nenhum registro encontrado.':'Nenhuma transcrição registrada ainda.')+'</div>';return;}
+  list.forEach(h=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<div class="item-top" onclick="this.closest(\'.item\').classList.toggle(\'open\')" style="cursor:pointer">'
+      +'<div class="item-lead"><div class="ava h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg></div>'
+      +'<div class="txt"><b>'+esc(h.patientName)+'</b><small>'+fmtDate(h.date)+' • '+fmtDur(h.durationSec)+(h.template?' • '+esc(h.template):'')+'</small></div></div>'
+      +'<div class="item-actions"><button class="icon-btn danger" title="Excluir" onclick="event.stopPropagation();delHistory(\''+h.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>'
+      +'<div class="hist-body">'+(h.organized?'<h4>Prontuário organizado</h4><pre>'+esc(h.organized)+'</pre>':'')+'<h4>Transcrição bruta</h4><pre>'+esc(h.raw)+'</pre>'
+      +'<button class="btn btn-ghost" onclick="copyText(\''+h.id+'\')">Copiar</button></div>';
+    wrap.appendChild(el);
+  });
 }
+function copyText(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(h.organized||h.raw).then(()=>toast('Copiado'));}
+function delHistory(id){if(!confirm('Excluir este registro do histórico?'))return;history=history.filter(h=>h.id!==id);saveHistory();renderHistory();toast('Registro excluído');}
+
+/* ===== Pacientes ===== */
+function fillPacSelect(){const sel=document.getElementById('pacSelect');const prev=sel.value;sel.innerHTML='<option value="">— Selecione o paciente —</option>';patients.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});if(prev)sel.value=prev;}
+function addPatient(){const name=document.getElementById('pacName').value.trim();if(!name){toast('Informe o nome completo');return;}patients.push({id:'p'+Date.now(),name,createdAt:new Date().toISOString()});savePatients();document.getElementById('pacName').value='';renderPatients();fillPacSelect();toast('Paciente cadastrado');}
+function delPatient(id){if(!confirm('Excluir este paciente?'))return;patients=patients.filter(p=>p.id!==id);savePatients();renderPatients();fillPacSelect();toast('Paciente excluído');}
+function newForPatient(id){document.getElementById('pacSelect').value=id;newConsult();document.getElementById('pacSelect').value=id;}
+function initials(n){return (n||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
+function renderPatients(){
+  const q=(document.getElementById('pacSearch')?.value||'').toLowerCase().trim();
+  const wrap=document.getElementById('pacList');wrap.innerHTML='';
+  let list=patients.slice().sort((a,b)=>a.name.localeCompare(b.name)); if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
+  if(!list.length){wrap.innerHTML='<div class="empty">'+(q?'Nenhum paciente encontrado.':'Nenhum paciente cadastrado ainda.')+'</div>';return;}
+  list.forEach(p=>{const count=history.filter(h=>h.patientId===p.id).length;
+    const el=document.createElement('div');el.className='item';
+    el.innerHTML='<div class="item-top"><div class="item-lead"><div class="ava p">'+esc(initials(p.name))+'</div>'
+      +'<div class="txt"><b>'+esc(p.name)+'</b><small>'+count+' transcrição(ões) no histórico</small></div></div>'
+      +'<div class="item-actions"><button class="btn btn-ghost" onclick="newForPatient(\''+p.id+'\')">Nova transcrição</button>'
+      +'<button class="icon-btn danger" title="Excluir" onclick="delPatient(\''+p.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>';
+    wrap.appendChild(el);
+  });
+}
+
+/* ===== Organizar ===== */
+function fillTplSelect(){const sel=document.getElementById('tplSelect');const prev=sel.value;sel.innerHTML='';const g=groupBySpec();Object.keys(g).sort().forEach(spec=>{const og=document.createElement('optgroup');og.label=spec;g[spec].forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;og.appendChild(o);});sel.appendChild(og);});if(prev)sel.value=prev;}
+function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textContent=text||'O resultado organizado aparece aqui.';b.classList.toggle('placeholder',!!ph||!text);}
 async function organize(){
-  const raw=document.getElementById('rawText').value.trim();
-  if(!raw){ toast('Nada para organizar — capte a consulta primeiro'); return; }
-  const tpl=templates.find(t=>t.id===document.getElementById('tplSelect').value);
-  if(!tpl){ toast('Selecione um modelo'); return; }
+  const raw=document.getElementById('rawText').value.trim(); if(!raw){toast('Nada para organizar — capte a consulta primeiro');return;}
+  const tpl=templates.find(t=>t.id===document.getElementById('tplSelect').value); if(!tpl){toast('Selecione um modelo');return;}
   document.getElementById('sheetTitle').textContent=tpl.spec+' • '+tpl.name;
-  const key=store.get('cfg.key',''), model=store.get('cfg.model','claude-sonnet-5');
-  if(!key){ setSheet('Configure sua chave de API em "⚙️ Configuração do organizador" para habilitar a organização automática.',true); toast('Chave de API não configurada'); return; }
-  const btn=document.getElementById('btnOrg'); btn.disabled=true; setSheet('Organizando…',true);
-  const system='Você é um assistente médico que estrutura transcrições de consultas em prontuários de anamnese. Reorganize o texto transcrito EXCLUSIVAMENTE com base no que foi dito — nunca invente dados clínicos. Use exatamente as seções fornecidas, nesta ordem, cada uma como um cabeçalho seguido do conteúdo. Se não houver informação para uma seção, escreva "Não relatado". Linguagem clínica, objetiva, em português do Brasil.';
-  const prompt='SEÇÕES DA ANAMNESE ('+tpl.spec+' — '+tpl.name+'):\n'+tpl.secs.map((s,i)=>(i+1)+'. '+s).join('\n')+'\n\nTRANSCRIÇÃO DA CONSULTA:\n"""\n'+raw+'\n"""\n\nDevolva apenas o prontuário organizado nas seções acima.';
+  const key=store.get('cfg.key',''),model=store.get('cfg.model','claude-sonnet-5');
+  if(!key){setSheet('Configure sua chave de API em Minha conta › Configuração do organizador para habilitar a organização automática.',true);toast('Chave de API não configurada');return;}
+  const btn=document.getElementById('btnOrg');btn.disabled=true;setSheet('Organizando…',true);
+  const system='Você é um assistente médico que estrutura transcrições de consultas em prontuários de anamnese. Reorganize o texto transcrito EXCLUSIVAMENTE com base no que foi dito — nunca invente dados clínicos. Use exatamente as seções fornecidas, nesta ordem, cada uma como cabeçalho seguido do conteúdo. Se não houver informação para uma seção, escreva "Não relatado". Linguagem clínica, objetiva, em português do Brasil.';
+  const prompt='SEÇÕES DA ANAMNESE ('+tpl.spec+' — '+tpl.name+'):\n'+tpl.secs.map((s,i)=>(i+1)+'. '+s).join('\n')+'\n\nTRANSCRIÇÃO:\n"""\n'+raw+'\n"""\n\nDevolva apenas o prontuário organizado nas seções acima.';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:model,max_tokens:2000,system:system,messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){ const err=await res.text(); setSheet('Erro na API ('+res.status+'). Verifique a chave e o modelo.\n\n'+err,false); return; }
-    const data=await res.json();
-    const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,system,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const err=await res.text();setSheet('Erro na API ('+res.status+'). Verifique a chave e o modelo.\n\n'+err,false);return;}
+    const data=await res.json();const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
     setSheet(out||'Sem resposta do modelo.',false);
-  }catch(e){ setSheet('Falha de conexão com a API: '+e.message,false); }
-  finally{ btn.disabled=false; }
+  }catch(e){setSheet('Falha de conexão com a API: '+e.message,false);}finally{btn.disabled=false;}
 }
-function copyOut(){ navigator.clipboard.writeText(document.getElementById('sheetBody').textContent).then(()=>toast('Copiado')); }
-function downloadOut(){ const t=document.getElementById('sheetBody').textContent; const b=new Blob([t],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='anamnese.txt'; a.click(); URL.revokeObjectURL(a.href); }
+function copyOut(){navigator.clipboard.writeText(document.getElementById('sheetBody').textContent).then(()=>toast('Copiado'));}
+function downloadOut(){const t=document.getElementById('sheetBody').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='anamnese.txt';a.click();URL.revokeObjectURL(a.href);}
 
-/* ============ Configuração ============ */
-function loadCfg(){ document.getElementById('apiKey').value=store.get('cfg.key',''); document.getElementById('apiModel').value=store.get('cfg.model','claude-sonnet-5'); }
-function saveCfg(){ store.set('cfg.key',document.getElementById('apiKey').value.trim()); store.set('cfg.model',document.getElementById('apiModel').value.trim()||'claude-sonnet-5'); toast('Configuração salva'); }
+/* ===== Conta ===== */
+function loadAccount(){document.getElementById('accName').value=account.name||'';document.getElementById('accEmail').value=account.email||'';document.getElementById('accPhone').value=account.phone||'';}
+function saveAccount(){account={name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim(),phone:document.getElementById('accPhone').value.trim()};store.set('account.v1',account);renderSideProfile();toast('Dados salvos');}
+function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
+function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');document.getElementById('apiModel').value=store.get('cfg.model','claude-sonnet-5');}
+function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());store.set('cfg.model',document.getElementById('apiModel').value.trim()||'claude-sonnet-5');toast('Configuração salva');}
 
-/* ============ Templates ============ */
-function groupBySpec(){ const g={}; templates.forEach(t=>{(g[t.spec]=g[t.spec]||[]).push(t);}); return g; }
-function fillSpecDatalist(){ const dl=document.getElementById('specList'); dl.innerHTML=''; [...new Set(templates.map(t=>t.spec))].sort().forEach(s=>{const o=document.createElement('option');o.value=s;dl.appendChild(o);}); }
+/* ===== Modelos (CRUD + edição) ===== */
+let editingId=null;
+function groupBySpec(){const g={};templates.forEach(t=>{(g[t.spec]=g[t.spec]||[]).push(t);});return g;}
+function fillSpecDatalist(){const dl=document.getElementById('specList');dl.innerHTML='';[...new Set(templates.map(t=>t.spec))].sort().forEach(s=>{const o=document.createElement('option');o.value=s;dl.appendChild(o);});}
 function renderTemplates(){
   fillSpecDatalist();
-  const q=(document.getElementById('tplSearch')?.value||'').toLowerCase().trim();
-  const wrap=document.getElementById('tplList'); wrap.innerHTML='';
-  let list=templates;
-  if(q) list=templates.filter(t=>(t.name+' '+t.spec+' '+t.secs.join(' ')).toLowerCase().includes(q));
-  if(!list.length){ wrap.innerHTML='<div class="empty">'+(q?'Nenhum modelo encontrado para essa busca.':'Nenhum modelo cadastrado ainda. Crie o primeiro acima.')+'</div>'; return; }
-  const g={}; list.forEach(t=>{(g[t.spec]=g[t.spec]||[]).push(t);});
+  const wrap=document.getElementById('tplList');wrap.innerHTML='';
+  if(!templates.length){wrap.innerHTML='<div class="empty">Nenhum modelo cadastrado ainda.</div>';return;}
+  const g=groupBySpec();
   Object.keys(g).sort().forEach(spec=>{
-    const grp=document.createElement('div'); grp.className='tpl-group';
-    grp.innerHTML='<h3>'+esc(spec)+'<span class="badge">'+g[spec].length+' modelo(s)</span></h3>';
-    g[spec].forEach(t=>{
-      const el=document.createElement('div'); el.className='tpl';
-      el.innerHTML='<div class="tpl-top"><div class="lead"><div class="ava"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></div><b>'+esc(t.name)+'</b></div>'
-        +'<button class="icon-btn danger" title="Excluir" onclick="delTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div>'
+    const grp=document.createElement('div');grp.style.marginBottom='18px';
+    grp.innerHTML='<h3 style="font-size:14px;display:flex;align-items:center;gap:9px;margin-bottom:11px">'+esc(spec)+'<span class="chip">'+g[spec].length+' modelo(s)</span></h3>';
+    g[spec].forEach(t=>{const el=document.createElement('div');el.className='item';
+      el.innerHTML='<div class="item-top"><div class="item-lead"><div class="ava t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></div><div class="txt"><b>'+esc(t.name)+'</b><small>'+t.secs.length+' seções</small></div></div>'
+        +'<div class="item-actions"><button class="icon-btn" title="Editar" onclick="editTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg></button>'
+        +'<button class="icon-btn danger" title="Excluir" onclick="delTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>'
         +'<div class="secs">'+t.secs.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>';
-      grp.appendChild(el);
-    });
+      grp.appendChild(el);});
     wrap.appendChild(grp);
   });
 }
-function addTemplate(){
-  const spec=document.getElementById('fSpec').value.trim(), name=document.getElementById('fName').value.trim();
+function submitTemplate(){
+  const spec=document.getElementById('fSpec').value.trim(),name=document.getElementById('fName').value.trim();
   const secs=document.getElementById('fSecs').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  if(!spec||!name||!secs.length){ toast('Preencha especialidade, nome e ao menos uma seção'); return; }
-  templates.push({id:'t'+Date.now(),spec,name,secs}); saveTemplates();
-  document.getElementById('fSpec').value=''; document.getElementById('fName').value=''; document.getElementById('fSecs').value='';
-  renderTemplates(); fillTplSelect(); toast('Modelo adicionado');
+  if(!spec||!name||!secs.length){toast('Preencha especialidade, nome e ao menos uma seção');return;}
+  if(editingId){const t=templates.find(x=>x.id===editingId);if(t){t.spec=spec;t.name=name;t.secs=secs;}toast('Modelo atualizado');}
+  else{templates.push({id:'t'+Date.now(),spec,name,secs});toast('Modelo adicionado');}
+  saveTemplates();cancelEdit();renderTemplates();fillTplSelect();
 }
-function delTemplate(id){ if(!confirm('Excluir este modelo?'))return; templates=templates.filter(t=>t.id!==id); saveTemplates(); renderTemplates(); fillTplSelect(); toast('Modelo excluído'); }
+function editTemplate(id){const t=templates.find(x=>x.id===id);if(!t)return;editingId=id;document.getElementById('fSpec').value=t.spec;document.getElementById('fName').value=t.name;document.getElementById('fSecs').value=t.secs.join('\n');document.getElementById('tplSubmit').innerHTML='Salvar alterações';document.getElementById('tplCancel').style.display='';document.getElementById('fSpec').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('fName').focus();}
+function cancelEdit(){editingId=null;document.getElementById('fSpec').value='';document.getElementById('fName').value='';document.getElementById('fSecs').value='';document.getElementById('tplSubmit').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Adicionar modelo';document.getElementById('tplCancel').style.display='none';}
+function delTemplate(id){if(!confirm('Excluir este modelo?'))return;templates=templates.filter(t=>t.id!==id);saveTemplates();renderTemplates();fillTplSelect();if(editingId===id)cancelEdit();toast('Modelo excluído');}
 
-/* ============ Utils ============ */
-function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-let toastTimer;
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+/* ===== Utils ===== */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
-/* ============ Init ============ */
-fillTplSelect(); loadCfg();
+/* ===== Init ===== */
+fillTplSelect();fillPacSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();
 </script>
 </body>
 </html>
