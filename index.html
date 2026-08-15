@@ -227,7 +227,6 @@
   <nav class="nav">
     <button id="nav-transc" class="active" onclick="showPage('transc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Transcrição</button>
     <button id="nav-hist" onclick="showPage('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg> Histórico</button>
-    <button id="nav-pac" onclick="showPage('pac')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M17 11h4m-2-2v4"/></svg> Pacientes</button>
   </nav>
 
   <div class="spacer"></div>
@@ -251,11 +250,6 @@
 
     <div class="surface">
       <div class="block-title"><span class="n">1</span> Sessão</div>
-      <div class="row" style="margin-top:12px">
-        <div><label class="fld" for="pacSelect">Paciente</label><select id="pacSelect"></select></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn btn-ghost" onclick="showPage('pac')">+ Cadastrar paciente</button></div>
-      </div>
-      <div id="whisperMsg" class="hint" style="margin-top:10px"></div>
 
       <div class="rec-panel">
         <div class="timer" id="timer">00:00</div>
@@ -269,10 +263,6 @@
 
       <label class="fld" for="rawText" style="margin-top:16px">Texto captado (editável)</label>
       <textarea id="rawText" placeholder="A fala aparece aqui conforme a consulta acontece. Você pode editar antes de organizar."></textarea>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px">
-        <button id="btnPunct" class="btn btn-ghost" onclick="punctuate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg> Pontuar e revisar texto</button>
-        <span class="hint" style="margin:0">Insere pontuação, maiúsculas e parágrafos sem alterar as palavras.</span>
-      </div>
 
       <div class="divider"></div>
 
@@ -280,7 +270,7 @@
       <p class="hint">Escolha o prontuário e estruture o texto captado nas seções da anamnese selecionada.</p>
       <div class="row">
         <div><label class="fld" for="tplSelect">Modelo de anamnese</label><select id="tplSelect"></select></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button id="btnOrg" class="btn btn-primary" onclick="organize()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Organizar de acordo com o prontuário</button></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button id="btnOrg" class="btn btn-primary" onclick="organize()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Processar Prontuário</button></div>
       </div>
 
       <div class="sheet" style="margin-top:18px">
@@ -297,29 +287,10 @@
 
   <!-- PAGE: HISTÓRICO -->
   <section id="page-hist" style="display:none">
-    <div class="page-head"><div><h1>Histórico</h1><p>Transcrições anteriores registradas por paciente.</p></div></div>
+    <div class="page-head"><div><h1>Histórico</h1><p>Transcrições anteriores registradas.</p></div></div>
     <div class="surface">
-      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input type="text" id="histSearch" placeholder="Buscar por paciente…" oninput="renderHistory()" /></div>
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input type="text" id="histSearch" placeholder="Buscar no histórico…" oninput="renderHistory()" /></div>
       <div id="histList"></div>
-    </div>
-  </section>
-
-  <!-- PAGE: PACIENTES -->
-  <section id="page-pac" style="display:none">
-    <div class="page-head"><div><h1>Pacientes</h1><p>Cadastre pacientes e acesse seus históricos.</p></div>
-      <div class="head-actions"><button class="btn btn-primary" onclick="document.getElementById('pacName').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Novo paciente</button></div>
-    </div>
-    <div class="surface">
-      <div class="block-title">Cadastrar paciente</div>
-      <p class="hint">Cadastro simplificado: informe o nome completo.</p>
-      <div class="row">
-        <div style="flex:3"><label class="fld" for="pacName">Nome completo</label><input type="text" id="pacName" placeholder="Ex.: Maria Aparecida da Silva" onkeydown="if(event.key==='Enter')addPatient()" /></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addPatient()">Cadastrar</button></div>
-      </div>
-    </div>
-    <div class="surface">
-      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input type="text" id="pacSearch" placeholder="Buscar paciente…" oninput="renderPatients()" /></div>
-      <div id="pacList"></div>
     </div>
   </section>
 
@@ -354,11 +325,10 @@
     </div>
 
     <div class="surface">
-      <div class="block-title">Configuração do organizador (API)</div>
-      <p class="hint">A organização usa um modelo de linguagem. A chave fica salva apenas neste navegador e é usada direto do cliente.</p>
+      <div class="block-title">Configuração do organizador (API Groq)</div>
+      <p class="hint">O processamento do prontuário usa a API da Groq (gratuita). Cole sua chave (gsk_...) — ela fica salva apenas neste navegador e é usada direto do cliente.</p>
       <div class="row">
-        <div style="flex:2"><label class="fld" for="apiKey">Chave da API (x-api-key)</label><input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" /></div>
-        <div><label class="fld" for="apiModel">Modelo</label><input type="text" id="apiModel" value="claude-sonnet-5" /></div>
+        <div><label class="fld" for="apiKey">Chave da Groq (gsk_...)</label><input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" /></div>
       </div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="saveCfg()">Salvar configuração</button>
       <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
@@ -406,20 +376,17 @@ const SEED=[
   {id:'seed-neu',spec:'Neurologia',name:'Anamnese neurológica',secs:['Identificação','Queixa principal','História da doença atual','Antecedentes pessoais','Antecedentes familiares','Medicações em uso','Exame neurológico','Hipóteses diagnósticas','Exames complementares','Conduta']},
 ];
 let templates=store.get('tpl.v1',null); if(templates===null){templates=SEED.slice();store.set('tpl.v1',templates);}
-let patients=store.get('pac.v1',[]);
 let history=store.get('hist.v1',[]);
 let account=store.get('account.v1',{name:'',email:'',phone:''});
 function saveTemplates(){store.set('tpl.v1',templates);}
-function savePatients(){store.set('pac.v1',patients);}
 function saveHistory(){store.set('hist.v1',history);}
 
 /* ===== Navegação ===== */
-const PAGES={transc:'page-transc',hist:'page-hist',pac:'page-pac',account:'page-account'};
+const PAGES={transc:'page-transc',hist:'page-hist',account:'page-account'};
 function showPage(p){
   Object.entries(PAGES).forEach(([k,id])=>document.getElementById(id).style.display=k===p?'':'none');
-  ['transc','hist','pac'].forEach(k=>document.getElementById('nav-'+k).classList.toggle('active',k===p));
+  ['transc','hist'].forEach(k=>document.getElementById('nav-'+k).classList.toggle('active',k===p));
   if(p==='hist')renderHistory();
-  if(p==='pac')renderPatients();
   if(p==='account'){renderTemplates();loadAccount();loadCfg();}
   document.querySelector('.main').scrollTo(0,0);
 }
@@ -428,7 +395,6 @@ function logout(){ if(confirm('Deseja sair? A transcrição atual não salva ser
 
 /* ===== Microfone + Web Speech ===== */
 let currentStream=null, recognition=null, recState='idle', finalText='', savedSession=false;
-let mediaRecorder=null, recChunks=[];
 let micCtx=null, micMonitors=[], micRAF=null, micChosen='';
 async function openMicModal(){
   document.getElementById('micModal').style.display='flex';
@@ -549,100 +515,26 @@ function setState(state,customText){
   else if(state==='pause'){st.classList.add('paused');txt.textContent=customText||'Pausado';fab.classList.remove('live');bS.disabled=true;bP.disabled=false;bF.disabled=false;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Retomar';}
   else{txt.textContent=customText||'Parado';fab.classList.remove('live');bS.disabled=false;bP.disabled=true;bF.disabled=true;bP.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar';}
 }
-/* transcrição automática — modelo fixo, sem escolhas para o médico */
-const WHISPER_MODEL='Xenova/whisper-base';
-function currentEngine(){ return 'whisper'; }
-function loadEngineCfg(){ setWhisperMsg('A transcrição roda no seu dispositivo; o texto pontuado aparece ao finalizar a gravação.'); }
-function setWhisperMsg(t){ const el=document.getElementById('whisperMsg'); if(!el)return; el.style.display=t?'':'none'; el.textContent=t||''; }
-
-/* ==== Whisper local (transformers.js) ==== */
-let TF=null, whisperPipe=null, whisperPipeModel=null;
-async function loadTF(){ if(TF)return TF; setWhisperMsg('Carregando biblioteca de transcrição…'); TF=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'); return TF; }
-async function getWhisper(model){
-  if(whisperPipe&&whisperPipeModel===model)return whisperPipe;
-  const {pipeline}=await loadTF();
-  const device=(navigator.gpu?'webgpu':'wasm');
-  const short=model.split('/')[1];
-  const cb=p=>{ if(p&&p.progress!=null) setWhisperMsg('Baixando modelo '+short+'… '+Math.round(p.progress)+'% (só na primeira vez)'); };
-  setWhisperMsg('Preparando modelo '+short+'…');
-  try{ whisperPipe=await pipeline('automatic-speech-recognition',model,{device,progress_callback:cb}); }
-  catch(e){ whisperPipe=await pipeline('automatic-speech-recognition',model,{device:'wasm',progress_callback:cb}); }
-  whisperPipeModel=model; return whisperPipe;
-}
-async function blobToPCM(blob){
-  const buf=await blob.arrayBuffer();
-  const ac=new (window.AudioContext||window.webkitAudioContext)();
-  const decoded=await ac.decodeAudioData(buf); try{ac.close();}catch(e){}
-  const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(decoded.duration*16000)),16000);
-  const src=off.createBufferSource(); src.buffer=decoded; src.connect(off.destination); src.start();
-  const rendered=await off.startRendering();
-  return rendered.getChannelData(0);
-}
-async function transcribeBlob(blob){
-  try{
-    const pipe=await getWhisper(WHISPER_MODEL);
-    setWhisperMsg('Transcrevendo áudio localmente…');
-    const pcm=await blobToPCM(blob);
-    const out=await pipe(pcm,{language:'portuguese',task:'transcribe',chunk_length_s:30,stride_length_s:5});
-    const text=(out&&out.text?out.text:'').trim();
-    const ta=document.getElementById('rawText'); ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+text; finalText=ta.value+' ';
-    setWhisperMsg(text?'Transcrição concluída.':'Nada foi reconhecido no áudio.');
-  }catch(e){ setWhisperMsg('Erro na transcrição local: '+e.message); }
-}
-
-/* ==== Dispatchers de gravação ==== */
-async function startRec(){ showPage('transc'); return currentEngine()==='whisper'?startWhisperRec():startLiveRec(); }
-function togglePause(){ return currentEngine()==='whisper'?togglePauseWhisper():togglePauseLive(); }
-async function finishRec(){ return currentEngine()==='whisper'?finishWhisperRec():finishLiveRec(); }
-
-/* ==== Modo ao vivo (Web Speech) ==== */
-async function startLiveRec(){
+async function startRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('Este navegador não suporta reconhecimento de voz ao vivo. Use o Whisper local, ou Chrome/Edge.');return;}
+  if(!SR){alert('Este navegador não suporta reconhecimento de voz. Use o Google Chrome ou o Microsoft Edge.');return;}
+  showPage('transc');
   await holdStream(document.getElementById('micSelect').value);
   finalText=document.getElementById('rawText').value; if(finalText&&!finalText.endsWith(' '))finalText+=' ';
   savedSession=false;
   recognition=makeRecognition(); setState('rec');
   try{recognition.start();startTimer();}catch(e){setState('idle','Não iniciou');}
 }
-function togglePauseLive(){
+function togglePause(){
   if(recState==='rec'){ setState('pause'); pauseTimer(); if(recognition){try{recognition.stop();}catch(e){}} }
   else if(recState==='pause'){ setState('rec'); recognition=makeRecognition(); try{recognition.start();startTimer();}catch(e){} }
 }
-function finishLiveRec(){
+function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
+function finishRec(){
   const dur=timerSec; finishToIdle();
   if(saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
   resetTimer();
 }
-
-/* ==== Modo Whisper (gravar → transcrever) ==== */
-async function startWhisperRec(){
-  if(!window.MediaRecorder){alert('Este navegador não suporta gravação de áudio (MediaRecorder).');return;}
-  await holdStream(document.getElementById('micSelect').value);
-  if(!currentStream){toast('Não foi possível acessar o microfone');return;}
-  savedSession=false; recChunks=[];
-  try{ mediaRecorder=new MediaRecorder(currentStream); }catch(e){ toast('Falha ao iniciar gravação'); return; }
-  mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size)recChunks.push(e.data); };
-  mediaRecorder.start();
-  setState('rec','Gravando…');
-  setWhisperMsg('Gravando o áudio. A transcrição local roda ao clicar em Finalizar.');
-  startTimer();
-}
-function togglePauseWhisper(){
-  if(recState==='rec'){ setState('pause','Pausado'); pauseTimer(); if(mediaRecorder&&mediaRecorder.state==='recording')try{mediaRecorder.pause();}catch(e){} }
-  else if(recState==='pause'){ setState('rec','Gravando…'); if(mediaRecorder&&mediaRecorder.state==='paused')try{mediaRecorder.resume();}catch(e){} startTimer(); }
-}
-async function finishWhisperRec(){
-  const dur=timerSec;
-  if(mediaRecorder&&mediaRecorder.state!=='inactive'){ await new Promise(res=>{ mediaRecorder.onstop=res; try{mediaRecorder.stop();}catch(e){res();} }); }
-  recState='idle'; pauseTimer(); setState('idle');
-  if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;}
-  const blob=new Blob(recChunks,{type:(mediaRecorder&&mediaRecorder.mimeType)||'audio/webm'}); recChunks=[];
-  if(blob.size){ await transcribeBlob(blob); } else { setWhisperMsg('Nenhum áudio gravado.'); }
-  if(saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
-  resetTimer();
-}
-function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
 function fabToggle(){ showPage('transc'); if(recState==='idle')startRec(); else finishRec(); }
 
 /* ===== Sessão / Histórico ===== */
@@ -650,9 +542,8 @@ function clearSession(){ document.getElementById('rawText').value=''; finalText=
 function saveToHistory(dur){
   const raw=document.getElementById('rawText').value.trim(); if(!raw)return false;
   const sheet=document.getElementById('sheetBody'); const organized=sheet.classList.contains('placeholder')?'':sheet.textContent;
-  const pid=document.getElementById('pacSelect').value; const pname=pid?(patients.find(p=>p.id===pid)?.name||'—'):'Não vinculado';
   const tpl=document.getElementById('sheetTitle').textContent; const tName=tpl!=='Prontuário organizado'?tpl:'';
-  history.unshift({id:'h'+Date.now(),patientId:pid,patientName:pname,date:new Date().toISOString(),durationSec:dur||0,template:tName,raw,organized});
+  history.unshift({id:'h'+Date.now(),date:new Date().toISOString(),durationSec:dur||0,template:tName,raw,organized});
   saveHistory(); return true;
 }
 function archiveCurrent(){ if(recState!=='idle')finishToIdle(); const raw=document.getElementById('rawText').value.trim(); if(raw&&!savedSession){ if(saveToHistory(timerSec)){savedSession=true;toast('Transcrição anterior registrada no histórico');} } }
@@ -661,13 +552,13 @@ function fmtDur(s){const m=Math.floor(s/60),ss=s%60;return m+'min '+String(ss).p
 function renderHistory(){
   const q=(document.getElementById('histSearch')?.value||'').toLowerCase().trim();
   const wrap=document.getElementById('histList'); wrap.innerHTML='';
-  let list=history; if(q)list=history.filter(h=>(h.patientName+' '+h.template).toLowerCase().includes(q));
+  let list=history; if(q)list=history.filter(h=>((h.template||'')+' '+fmtDate(h.date)).toLowerCase().includes(q));
   if(!list.length){wrap.innerHTML='<div class="empty">'+(q?'Nenhum registro encontrado.':'Nenhuma transcrição registrada ainda.')+'</div>';return;}
   list.forEach(h=>{
     const el=document.createElement('div'); el.className='item';
     el.innerHTML='<div class="item-top" onclick="this.closest(\'.item\').classList.toggle(\'open\')" style="cursor:pointer">'
       +'<div class="item-lead"><div class="ava h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg></div>'
-      +'<div class="txt"><b>'+esc(h.patientName)+'</b><small>'+fmtDate(h.date)+' • '+fmtDur(h.durationSec)+(h.template?' • '+esc(h.template):'')+'</small></div></div>'
+      +'<div class="txt"><b>'+esc(h.template||'Transcrição')+'</b><small>'+fmtDate(h.date)+' • '+fmtDur(h.durationSec)+'</small></div></div>'
       +'<div class="item-actions"><button class="icon-btn danger" title="Excluir" onclick="event.stopPropagation();delHistory(\''+h.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>'
       +'<div class="hist-body">'+(h.organized?'<h4>Prontuário organizado</h4><pre>'+esc(h.organized)+'</pre>':'')+'<h4>Transcrição bruta</h4><pre>'+esc(h.raw)+'</pre>'
       +'<button class="btn btn-ghost" onclick="copyText(\''+h.id+'\')">Copiar</button></div>';
@@ -677,60 +568,38 @@ function renderHistory(){
 function copyText(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(h.organized||h.raw).then(()=>toast('Copiado'));}
 function delHistory(id){if(!confirm('Excluir este registro do histórico?'))return;history=history.filter(h=>h.id!==id);saveHistory();renderHistory();toast('Registro excluído');}
 
-/* ===== Pacientes ===== */
-function fillPacSelect(){const sel=document.getElementById('pacSelect');const prev=sel.value;sel.innerHTML='<option value="">— Selecione o paciente —</option>';patients.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});if(prev)sel.value=prev;}
-function addPatient(){const name=document.getElementById('pacName').value.trim();if(!name){toast('Informe o nome completo');return;}patients.push({id:'p'+Date.now(),name,createdAt:new Date().toISOString()});savePatients();document.getElementById('pacName').value='';renderPatients();fillPacSelect();toast('Paciente cadastrado');}
-function delPatient(id){if(!confirm('Excluir este paciente?'))return;patients=patients.filter(p=>p.id!==id);savePatients();renderPatients();fillPacSelect();toast('Paciente excluído');}
-function newForPatient(id){document.getElementById('pacSelect').value=id;newConsult();document.getElementById('pacSelect').value=id;}
 function initials(n){return (n||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
-function renderPatients(){
-  const q=(document.getElementById('pacSearch')?.value||'').toLowerCase().trim();
-  const wrap=document.getElementById('pacList');wrap.innerHTML='';
-  let list=patients.slice().sort((a,b)=>a.name.localeCompare(b.name)); if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
-  if(!list.length){wrap.innerHTML='<div class="empty">'+(q?'Nenhum paciente encontrado.':'Nenhum paciente cadastrado ainda.')+'</div>';return;}
-  list.forEach(p=>{const count=history.filter(h=>h.patientId===p.id).length;
-    const el=document.createElement('div');el.className='item';
-    el.innerHTML='<div class="item-top"><div class="item-lead"><div class="ava p">'+esc(initials(p.name))+'</div>'
-      +'<div class="txt"><b>'+esc(p.name)+'</b><small>'+count+' transcrição(ões) no histórico</small></div></div>'
-      +'<div class="item-actions"><button class="btn btn-ghost" onclick="newForPatient(\''+p.id+'\')">Nova transcrição</button>'
-      +'<button class="icon-btn danger" title="Excluir" onclick="delPatient(\''+p.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>';
-    wrap.appendChild(el);
-  });
-}
 
 /* ===== Organizar ===== */
 function fillTplSelect(){const sel=document.getElementById('tplSelect');const prev=sel.value;sel.innerHTML='';const g=groupBySpec();Object.keys(g).sort().forEach(spec=>{const og=document.createElement('optgroup');og.label=spec;g[spec].forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;og.appendChild(o);});sel.appendChild(og);});if(prev)sel.value=prev;}
 function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textContent=text||'O resultado organizado aparece aqui.';b.classList.toggle('placeholder',!!ph||!text);}
-async function punctuate(){
-  const raw=document.getElementById('rawText').value.trim();
-  if(!raw){toast('Não há texto para pontuar');return;}
-  const key=store.get('cfg.key',''),model=store.get('cfg.model','claude-sonnet-5');
-  if(!key){toast('Configure a chave de API em Minha conta');showPage('account');return;}
-  const btn=document.getElementById('btnPunct'); const old=btn.innerHTML; btn.disabled=true; btn.innerHTML='Pontuando…';
-  const system='Você recebe uma transcrição de fala em português do Brasil, capturada sem pontuação. Sua tarefa é APENAS tornar o texto legível: adicione pontuação, acentuação, letras maiúsculas onde cabível e quebras de parágrafo. NÃO altere, adicione, remova, resuma ou reordene o conteúdo e as palavras — preserve exatamente o que foi dito. Corrija somente erros evidentes de reconhecimento de fala quando o sentido for inequívoco. Responda apenas com o texto pontuado, sem comentários.';
+const GROQ_MODEL='llama-3.3-70b-versatile';
+async function callLLM(system,user){
+  const key=store.get('cfg.key','');
+  if(!key){const e=new Error('Chave da Groq não configurada em Minha conta.');e.code='no-key';throw e;}
+  let res;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,system,messages:[{role:'user',content:raw}]})});
-    if(!res.ok){toast('Erro na API ('+res.status+')');return;}
-    const data=await res.json(); const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
-    if(out){ document.getElementById('rawText').value=out; finalText=out+' '; toast('Texto pontuado'); }
-  }catch(e){toast('Falha de conexão: '+e.message);}
-  finally{ btn.disabled=false; btn.innerHTML=old; }
+    res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+      headers:{'content-type':'application/json','authorization':'Bearer '+key},
+      body:JSON.stringify({model:GROQ_MODEL,temperature:0.2,max_tokens:2000,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+  }catch(e){ throw new Error('Falha de rede/CORS: a Groq pode não permitir chamada direta do navegador. Nesse caso é preciso um proxy.'); }
+  if(!res.ok){ let d=''; try{d=await res.text();}catch(e){} throw new Error('Erro na API ('+res.status+'). Verifique a chave e o modelo.'+(d?'\n'+d:'')); }
+  const data=await res.json();
+  return (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||'').trim();
 }
 async function organize(){
   const raw=document.getElementById('rawText').value.trim(); if(!raw){toast('Nada para organizar — capte a consulta primeiro');return;}
   const tpl=templates.find(t=>t.id===document.getElementById('tplSelect').value); if(!tpl){toast('Selecione um modelo');return;}
   document.getElementById('sheetTitle').textContent=tpl.spec+' • '+tpl.name;
-  const key=store.get('cfg.key',''),model=store.get('cfg.model','claude-sonnet-5');
-  if(!key){setSheet('Configure sua chave de API em Minha conta › Configuração do organizador para habilitar a organização automática.',true);toast('Chave de API não configurada');return;}
+  if(!store.get('cfg.key','')){setSheet('Configure sua chave da Groq em Minha conta › Configuração do organizador para habilitar a organização automática.',true);toast('Chave de API não configurada');return;}
   const btn=document.getElementById('btnOrg');btn.disabled=true;setSheet('Organizando…',true);
   const system='Você é um assistente médico que estrutura transcrições de consultas em prontuários de anamnese. Reorganize o texto transcrito EXCLUSIVAMENTE com base no que foi dito — nunca invente dados clínicos. Use exatamente as seções fornecidas, nesta ordem, cada uma como cabeçalho seguido do conteúdo. Se não houver informação para uma seção, escreva "Não relatado". Linguagem clínica, objetiva, em português do Brasil.';
   const prompt='SEÇÕES DA ANAMNESE ('+tpl.spec+' — '+tpl.name+'):\n'+tpl.secs.map((s,i)=>(i+1)+'. '+s).join('\n')+'\n\nTRANSCRIÇÃO:\n"""\n'+raw+'\n"""\n\nDevolva apenas o prontuário organizado nas seções acima.';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,system,messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const err=await res.text();setSheet('Erro na API ('+res.status+'). Verifique a chave e o modelo.\n\n'+err,false);return;}
-    const data=await res.json();const out=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    const out=await callLLM(system,prompt);
     setSheet(out||'Sem resposta do modelo.',false);
-  }catch(e){setSheet('Falha de conexão com a API: '+e.message,false);}finally{btn.disabled=false;}
+  }catch(e){ setSheet(e.message,false); }
+  finally{ btn.disabled=false; }
 }
 function copyOut(){navigator.clipboard.writeText(document.getElementById('sheetBody').textContent).then(()=>toast('Copiado'));}
 function downloadOut(){const t=document.getElementById('sheetBody').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='anamnese.txt';a.click();URL.revokeObjectURL(a.href);}
@@ -739,8 +608,8 @@ function downloadOut(){const t=document.getElementById('sheetBody').textContent;
 function loadAccount(){document.getElementById('accName').value=account.name||'';document.getElementById('accEmail').value=account.email||'';document.getElementById('accPhone').value=account.phone||'';}
 function saveAccount(){account={name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim(),phone:document.getElementById('accPhone').value.trim()};store.set('account.v1',account);renderSideProfile();toast('Dados salvos');}
 function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
-function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');document.getElementById('apiModel').value=store.get('cfg.model','claude-sonnet-5');}
-function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());store.set('cfg.model',document.getElementById('apiModel').value.trim()||'claude-sonnet-5');toast('Configuração salva');}
+function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');}
+function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());toast('Configuração salva');}
 
 /* ===== Modelos (CRUD + edição) ===== */
 let editingId=null;
@@ -780,7 +649,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
 /* ===== Init ===== */
-fillTplSelect();fillPacSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();loadEngineCfg();
+fillTplSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();
 </script>
 </body>
 </html>
