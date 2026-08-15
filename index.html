@@ -136,6 +136,12 @@
   .favtag{font-size:11px;font-weight:600;color:var(--purple-deep);background:var(--purple-soft);padding:1px 7px;border-radius:999px;margin-left:6px}
   .icon-btn.fav{color:#E8A100}
   .icon-btn.fav:hover{background:#FBF3DD}
+  .mode-seg{display:flex;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:4px;margin-bottom:8px}
+  .mode-seg button{flex:1;all:unset;text-align:center;cursor:pointer;padding:9px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--muted)}
+  .mode-seg button.active{background:var(--panel);color:var(--purple-deep);box-shadow:var(--shadow)}
+  .mode-badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+  .mode-badge.pres{color:var(--purple-deep);background:var(--purple-soft)}
+  .mode-badge.on{color:#0E6E86;background:#DDF3F7}
 
   .icon-btn{all:unset;padding:6px;border-radius:8px;color:var(--muted);display:grid;place-items:center}
   .icon-btn:hover{background:var(--bg);color:var(--ink)}
@@ -305,7 +311,7 @@
     <div class="page-head"><div><h1>Transcrição</h1><p>Capte a entrevista clínica e organize o texto de acordo com o modelo de anamnese.</p></div></div>
 
     <div class="surface">
-      <div class="block-title"><span class="n">1</span> Sessão</div>
+      <div class="block-title"><span class="n">1</span> Sessão <span id="modeBadge" class="mode-badge pres">Consulta presencial</span></div>
 
       <div class="rec-panel">
         <div class="timer" id="timer">00:00</div>
@@ -401,6 +407,11 @@
       <button class="modal-x" onclick="closeMicModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
     <div class="modal-sub" id="micCount">Procurando dispositivos…</div>
+    <div class="mode-seg" id="modeSeg">
+      <button data-m="presencial" onclick="setConsultMode('presencial')">Presencial</button>
+      <button data-m="online" onclick="setConsultMode('online')">Online</button>
+    </div>
+    <div id="modeHint" class="hint" style="margin:0 0 14px"></div>
     <div id="micDevList" class="mic-devlist"></div>
     <div class="mic-sel-sep"></div>
     <div class="mic-sel-label">Microfone selecionado:</div>
@@ -508,6 +519,7 @@ function logout(){ if(confirm('Deseja sair? A transcrição atual não salva ser
 
 /* ===== Microfone + Web Speech ===== */
 let currentStream=null, recognition=null, recState='idle', finalText='', savedSession=false;
+let mediaRecorder=null, recChunks=[], displayStream=null, micStream=null, mixAC=null, activeMode='presencial';
 let micCtx=null, micMonitors=[], micRAF=null, micChosen='';
 async function openMicModal(){
   document.getElementById('micModal').style.display='flex';
@@ -522,7 +534,7 @@ async function openMicModal(){
   const mics=devices.filter(d=>d.kind==='audioinput'&&d.deviceId);
   document.getElementById('micCount').textContent=mics.length+' dispositivo'+(mics.length===1?'':'s')+' encontrado'+(mics.length===1?'':'s');
   if(!micChosen&&mics[0]) micChosen=mics[0].deviceId;
-  buildDevList(mics); startMeters();
+  buildDevList(mics); startMeters(); reflectConsultMode();
 }
 function makeMeterEl(){const m=document.createElement('span');m.className='meter';for(let i=0;i<10;i++)m.appendChild(document.createElement('i'));return m;}
 function setMeter(el,lit){const b=el.children;for(let i=0;i<b.length;i++)b[i].className=i<lit?'on':'';}
@@ -677,23 +689,94 @@ function setState(state,customText){
     bar.classList.remove('show','paused');barPause.innerHTML=icPause;}
   updateDocTitle();updatePiP();
 }
-async function startRec(){
+function consultMode(){ return store.get('consultMode','presencial'); }
+function setConsultMode(m){ store.set('consultMode',m); reflectConsultMode(); }
+function reflectConsultMode(){
+  const m=consultMode();
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+  const h=document.getElementById('modeHint'); if(h) h.textContent = m==='online'
+    ? 'Online: captura o áudio da aba da videochamada (voz do paciente) + seu microfone. O texto aparece ao finalizar. Requer Chrome/Edge no computador.'
+    : 'Presencial: transcrição ao vivo pelo microfone selecionado.';
+  const b=document.getElementById('modeBadge'); if(b){ b.textContent = m==='online'?'Consulta online':'Consulta presencial'; b.className='mode-badge '+(m==='online'?'on':'pres'); }
+}
+
+async function startRec(){ showPage('transc'); if(consultMode()==='online') return startOnlineRec(); return startPresencialRec(); }
+
+async function startPresencialRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('Este navegador não suporta reconhecimento de voz. Use o Google Chrome ou o Microsoft Edge.');return;}
-  showPage('transc');
+  if(!SR){alert('Este navegador não suporta reconhecimento de voz ao vivo. Use o modo Online, ou Chrome/Edge.');return;}
+  activeMode='presencial';
   finalText=document.getElementById('rawText').value; if(finalText&&!finalText.endsWith(' '))finalText+=' ';
   savedSession=false;
   recognition=makeRecognition(); setState('rec');
   try{recognition.start();startTimer();}catch(e){setState('idle','Não iniciou');}
 }
-function togglePause(){
+
+async function startOnlineRec(){
+  if(!window.MediaRecorder){alert('Este navegador não suporta gravação. Use Chrome/Edge no computador.');return;}
+  if(!navigator.mediaDevices.getDisplayMedia){alert('Captura de áudio da aba indisponível neste navegador. Use Chrome/Edge no computador.');return;}
+  let mic,disp;
+  const devId=document.getElementById('micSelect').value;
+  try{ mic=await navigator.mediaDevices.getUserMedia({audio:devId?{deviceId:{exact:devId}}:true}); }
+  catch(e){ toast('Não foi possível acessar o microfone'); return; }
+  try{ disp=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true}); }
+  catch(e){ mic.getTracks().forEach(t=>t.stop()); toast('Captura da aba cancelada'); return; }
+  const dispAudio=disp.getAudioTracks();
+  if(!dispAudio.length){ mic.getTracks().forEach(t=>t.stop()); disp.getTracks().forEach(t=>t.stop()); alert('Marque "Compartilhar áudio da aba" ao escolher a aba da chamada. Tente novamente.'); return; }
+  activeMode='online'; micStream=mic; displayStream=disp; savedSession=false; recChunks=[];
+  mixAC=new (window.AudioContext||window.webkitAudioContext)();
+  const dest=mixAC.createMediaStreamDestination();
+  try{ mixAC.createMediaStreamSource(mic).connect(dest); }catch(e){}
+  try{ mixAC.createMediaStreamSource(new MediaStream(dispAudio)).connect(dest); }catch(e){}
+  mediaRecorder=new MediaRecorder(dest.stream);
+  mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size)recChunks.push(e.data); };
+  disp.getVideoTracks().forEach(t=>t.addEventListener('ended',()=>{ if(recState!=='idle')finishRec(); }));
+  document.getElementById('rawText').value=''; finalText='';
+  mediaRecorder.start(); setState('rec','Gravando (online)…'); startTimer();
+  toast('Gravando consulta online — médico + paciente');
+}
+
+async function transcribeAudioGroq(blob){
+  const key=store.get('cfg.key',''); if(!key) throw new Error('Configure a chave da Groq em Minha conta');
+  const form=new FormData();
+  form.append('file',blob,'consulta.webm');
+  form.append('model','whisper-large-v3');
+  form.append('language','pt');
+  form.append('response_format','json');
+  const res=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'authorization':'Bearer '+key},body:form});
+  if(!res.ok){ let d=''; try{d=await res.text();}catch(e){} throw new Error('Erro na transcrição ('+res.status+') '+d); }
+  const data=await res.json(); return (data.text||'').trim();
+}
+function stopOnlineStreams(){ if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;} if(displayStream){displayStream.getTracks().forEach(t=>t.stop());displayStream=null;} if(mixAC){try{mixAC.close();}catch(e){}mixAC=null;} }
+function togglePause(){ return activeMode==='online'?togglePauseOnline():togglePausePresencial(); }
+function togglePausePresencial(){
   if(recState==='rec'){ setState('pause'); pauseTimer(); if(recognition){try{recognition.stop();}catch(e){}} }
   else if(recState==='pause'){ setState('rec'); recognition=makeRecognition(); try{recognition.start();startTimer();}catch(e){} }
 }
-function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
-async function finishRec(){
+function togglePauseOnline(){
+  if(recState==='rec'){ setState('pause','Pausado'); pauseTimer(); if(mediaRecorder&&mediaRecorder.state==='recording')try{mediaRecorder.pause();}catch(e){} }
+  else if(recState==='pause'){ setState('rec','Gravando (online)…'); if(mediaRecorder&&mediaRecorder.state==='paused')try{mediaRecorder.resume();}catch(e){} startTimer(); }
+}
+function finishToIdle(){ recState='idle'; if(recognition){try{recognition.stop();}catch(e){}} if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch(e){}} stopOnlineStreams(); if(currentStream){currentStream.getTracks().forEach(t=>t.stop());currentStream=null;} pauseTimer(); setState('idle'); }
+async function finishRec(){ return activeMode==='online'?finishOnlineRec():finishPresencialRec(); }
+async function finishPresencialRec(){
   const dur=timerSec; finishToIdle();
   if(await saveToHistory(dur)){ savedSession=true; toast('Transcrição salva no histórico'); }
+  resetTimer();
+}
+async function finishOnlineRec(){
+  const dur=timerSec;
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){ await new Promise(res=>{ mediaRecorder.onstop=res; try{mediaRecorder.stop();}catch(e){res();} }); }
+  recState='idle'; pauseTimer(); setState('idle');
+  const blob=new Blob(recChunks,{type:(mediaRecorder&&mediaRecorder.mimeType)||'audio/webm'}); recChunks=[];
+  stopOnlineStreams();
+  const ta=document.getElementById('rawText');
+  if(blob.size){
+    ta.value='⏳ Transcrevendo a consulta… isso pode levar alguns segundos.';
+    try{ const text=await transcribeAudioGroq(blob); ta.value=text||''; finalText=(text||'')+' '; toast('Transcrição concluída'); }
+    catch(e){ ta.value=''; toast('Erro: '+(e.message||e).split('\n')[0]); }
+  }
+  if(await saveToHistory(dur)){ savedSession=true; }
   resetTimer();
 }
 function fabToggle(){ showPage('transc'); if(recState==='idle')startRec(); else finishRec(); }
@@ -934,7 +1017,7 @@ function openSupport(kind){
   else toast('Configure o link no código (SUPPORT.'+kind+')');
 }
 
-fillTplSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();applySidebar();initTemplatesCloud();
+fillTplSelect();renderSideProfile();renderTimer();setState('idle');applySavedMic();applySidebar();reflectConsultMode();initTemplatesCloud();
 </script>
 </body>
 </html>
