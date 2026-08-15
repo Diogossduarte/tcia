@@ -118,6 +118,15 @@
   .sheet-head b{font-size:13.5px}
   .sheet-body{padding:8px 18px 18px;white-space:pre-wrap;font-size:14px;line-height:1.7;min-height:110px}
   .sheet-body.placeholder{color:var(--muted-2)}
+  .sheet-body .md-h{font-weight:700;margin:15px 0 5px}
+  .sheet-body .md-h:first-child{margin-top:2px}
+  .sheet-body p{margin:0 0 9px;line-height:1.7}
+  .sheet-body ul{margin:0 0 9px;padding-left:22px}
+  .sheet-body li{line-height:1.7;margin-bottom:3px}
+  .sheet-body .md-sp{height:2px}
+  .hist-body .md-render .md-h{font-weight:700;margin:10px 0 4px}
+  .hist-body .md-render p{margin:0 0 7px;line-height:1.6}
+  .hist-body .md-render ul{margin:0 0 7px;padding-left:20px}
 
   .icon-btn{all:unset;padding:6px;border-radius:8px;color:var(--muted);display:grid;place-items:center}
   .icon-btn:hover{background:var(--bg);color:var(--ink)}
@@ -461,6 +470,7 @@ async function initTemplatesCloud(){
     const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');
     sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
     await loadTemplatesRemote();
+    await loadAccountRemote();
   }catch(e){ console.error('Supabase indisponível:',e); sb=null; }
 }
 async function loadTemplatesRemote(){
@@ -679,10 +689,10 @@ function finishRec(){
 function fabToggle(){ showPage('transc'); if(recState==='idle')startRec(); else finishRec(); }
 
 /* ===== Sessão / Histórico ===== */
-function clearSession(){ document.getElementById('rawText').value=''; finalText=''; setSheet('',true); document.getElementById('sheetTitle').textContent='Prontuário organizado'; resetTimer(); savedSession=false; }
+function clearSession(){ document.getElementById('rawText').value=''; finalText=''; setSheet('',true); lastOutput=''; document.getElementById('sheetTitle').textContent='Prontuário organizado'; resetTimer(); savedSession=false; }
 function saveToHistory(dur){
   const raw=document.getElementById('rawText').value.trim(); if(!raw)return false;
-  const sheet=document.getElementById('sheetBody'); const organized=sheet.classList.contains('placeholder')?'':sheet.textContent;
+  const sheet=document.getElementById('sheetBody'); const organized=sheet.classList.contains('placeholder')?'':(lastOutput||sheet.textContent);
   const tpl=document.getElementById('sheetTitle').textContent; const tName=tpl!=='Prontuário organizado'?tpl:'';
   history.unshift({id:'h'+Date.now(),date:new Date().toISOString(),durationSec:dur||0,template:tName,raw,organized});
   saveHistory(); return true;
@@ -701,7 +711,7 @@ function renderHistory(){
       +'<div class="item-lead"><div class="ava h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg></div>'
       +'<div class="txt"><b>'+esc(h.template||'Transcrição')+'</b><small>'+fmtDate(h.date)+' • '+fmtDur(h.durationSec)+'</small></div></div>'
       +'<div class="item-actions"><button class="icon-btn danger" title="Excluir" onclick="event.stopPropagation();delHistory(\''+h.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button></div></div>'
-      +'<div class="hist-body">'+(h.organized?'<h4>Prontuário organizado</h4><pre>'+esc(h.organized)+'</pre>':'')+'<h4>Transcrição bruta</h4><pre>'+esc(h.raw)+'</pre>'
+      +'<div class="hist-body">'+(h.organized?'<h4>Prontuário</h4><div class="md-render">'+mdToHtml(h.organized)+'</div>':'')+'<h4>Transcrição bruta</h4><pre>'+esc(h.raw)+'</pre>'
       +'<button class="btn btn-ghost" onclick="copyText(\''+h.id+'\')">Copiar</button></div>';
     wrap.appendChild(el);
   });
@@ -713,7 +723,9 @@ function initials(n){return (n||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]||
 
 /* ===== Organizar ===== */
 function fillTplSelect(){const sel=document.getElementById('tplSelect');const prev=sel.value;sel.innerHTML='';const g=groupBySpec();Object.keys(g).sort().forEach(spec=>{const og=document.createElement('optgroup');og.label=spec;g[spec].forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;og.appendChild(o);});sel.appendChild(og);});if(prev)sel.value=prev;}
+let lastOutput='';
 function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textContent=text||'O resultado organizado aparece aqui.';b.classList.toggle('placeholder',!!ph||!text);}
+function renderSheetMd(md){lastOutput=md;const b=document.getElementById('sheetBody');b.innerHTML=mdToHtml(md);b.classList.remove('placeholder');}
 const GROQ_MODEL='llama-3.3-70b-versatile';
 async function callLLM(system,user){
   const key=store.get('cfg.key','');
@@ -734,20 +746,37 @@ async function organize(){
   document.getElementById('sheetTitle').textContent=tpl.spec+' • '+tpl.name;
   if(!store.get('cfg.key','')){setSheet('Configure sua chave da Groq em Minha conta › Configuração do organizador para habilitar a organização automática.',true);toast('Chave de API não configurada');return;}
   const btn=document.getElementById('btnOrg');btn.disabled=true;setSheet('Organizando…',true);
-  const system='Você é um assistente médico que preenche modelos de prontuário de anamnese. Preencha o MODELO abaixo usando SOMENTE informações presentes na transcrição — nunca invente dados clínicos. Siga rigorosamente as instruções escritas no próprio modelo: os textos entre parênteses (por exemplo, "incluir apenas se mencionado; caso contrário, omitir") e a linha "Formato:" quando existir. Mantenha linguagem clínica e objetiva, em português do Brasil.';
+  const system='Você é um assistente médico que preenche modelos de prontuário de anamnese. Preencha o MODELO abaixo usando SOMENTE informações presentes na transcrição — nunca invente dados clínicos. Siga rigorosamente as instruções escritas no próprio modelo: os textos entre parênteses (por exemplo, "incluir apenas se mencionado; caso contrário, omitir") e a linha "Formato:" quando existir. Preserve os títulos das seções exatamente como no modelo, iniciados por ## (Markdown), e escreva o conteúdo de cada seção como texto corrido em parágrafos. Mantenha linguagem clínica e objetiva, em português do Brasil.';
   const prompt='MODELO DE PRONTUÁRIO:\n"""\n'+tpl.conteudo+'\n"""\n\nTRANSCRIÇÃO DA CONSULTA:\n"""\n'+raw+'\n"""\n\nDevolva apenas o prontuário preenchido conforme o modelo.';
   try{
     const out=await callLLM(system,prompt);
-    setSheet(out||'Sem resposta do modelo.',false);
+    if(out){ renderSheetMd(out); } else { setSheet('Sem resposta do modelo.',false); }
   }catch(e){ setSheet(e.message,false); }
   finally{ btn.disabled=false; }
 }
-function copyOut(){navigator.clipboard.writeText(document.getElementById('sheetBody').textContent).then(()=>toast('Copiado'));}
-function downloadOut(){const t=document.getElementById('sheetBody').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='anamnese.txt';a.click();URL.revokeObjectURL(a.href);}
+function copyOut(){navigator.clipboard.writeText(mdToPlain(lastOutput)||document.getElementById('sheetBody').textContent).then(()=>toast('Copiado'));}
+function downloadOut(){const t=mdToPlain(lastOutput)||document.getElementById('sheetBody').textContent;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='anamnese.txt';a.click();URL.revokeObjectURL(a.href);}
 
 /* ===== Conta ===== */
 function loadAccount(){document.getElementById('accName').value=account.name||'';document.getElementById('accEmail').value=account.email||'';document.getElementById('accPhone').value=account.phone||'';}
-function saveAccount(){account={name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim(),phone:document.getElementById('accPhone').value.trim()};store.set('account.v1',account);renderSideProfile();toast('Dados salvos');}
+async function saveAccount(){
+  account={name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim(),phone:document.getElementById('accPhone').value.trim()};
+  store.set('account.v1',account);renderSideProfile();
+  if(cloudOn()){
+    try{ const {error}=await sb.from('conta').upsert({id:'default',name:account.name,email:account.email,phone:account.phone}); if(error)throw error; }
+    catch(e){ toast('Erro ao salvar conta na nuvem: '+(e.message||e)); return; }
+  }
+  toast('Dados salvos');
+}
+async function loadAccountRemote(){
+  if(!sb) return;
+  try{
+    const {data,error}=await sb.from('conta').select('*').eq('id','default').maybeSingle();
+    if(error||!data) return;
+    account={name:data.name||'',email:data.email||'',phone:data.phone||''};
+    store.set('account.v1',account); loadAccount(); renderSideProfile();
+  }catch(e){}
+}
 function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
 function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');}
 function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());toast('Configuração salva');}
@@ -804,6 +833,21 @@ async function delTemplate(id){
 
 /* ===== Utils ===== */
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function mdToHtml(md){
+  const e=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const inl=s=>e(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  const lines=String(md||'').split('\n'); let html='',inList=false;
+  const cl=()=>{ if(inList){html+='</ul>';inList=false;} };
+  for(const raw of lines){
+    const line=raw.replace(/\s+$/,'');
+    if(/^#{1,6}\s+/.test(line)){ cl(); html+='<div class="md-h">'+inl(line.replace(/^#{1,6}\s+/,''))+'</div>'; }
+    else if(/^\s*[-*]\s+/.test(line)){ if(!inList){html+='<ul>';inList=true;} html+='<li>'+inl(line.replace(/^\s*[-*]\s+/,''))+'</li>'; }
+    else if(line.trim()===''){ cl(); html+='<div class="md-sp"></div>'; }
+    else { cl(); html+='<p>'+inl(line)+'</p>'; }
+  }
+  cl(); return html;
+}
+function mdToPlain(md){ return String(md||'').replace(/^#{1,6}\s+/gm,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/^\s*[-*]\s+/gm,'• '); }
 let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
 /* ===== Init ===== */
