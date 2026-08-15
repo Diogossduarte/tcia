@@ -1,0 +1,30 @@
+# Mantém o projeto Supabase (plano Free) ativo, evitando a pausa por inatividade.
+# Faz uma consulta leve na tabela "modelos" todos os dias — isso conta como atividade.
+#
+# COMO USAR:
+# 1. No seu repositório do GitHub, crie o arquivo em:  .github/workflows/keepalive.yml
+#    (copie este conteúdo para lá)
+# 2. Faça commit na branch padrão (main). Pronto — ele roda sozinho todo dia.
+# 3. Para testar na hora: aba "Actions" do repo > "Keep Supabase Alive" > "Run workflow".
+
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Todo dia às 06:17 UTC (~03:17 no horário de Brasília). Margem enorme frente ao limite de 7 dias.
+    - cron: "17 6 * * *"
+  workflow_dispatch: {}   # permite disparar manualmente pela aba Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        run: |
+          echo "Consultando a tabela modelos para registrar atividade..."
+          curl -sS -o /dev/null -w "Resposta do Supabase: HTTP %{http_code}\n" \
+            "${SUPABASE_URL}/rest/v1/modelos?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}"
+        env:
+          SUPABASE_URL: https://mzbhgdnejzgeilvaryue.supabase.co
+          SUPABASE_KEY: sb_publishable_WGQ32_3hxaQqy98g5vOBcw_jWQ5R6pX
