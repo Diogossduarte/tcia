@@ -368,7 +368,12 @@
         <div><label class="fld" for="accEmail">E-mail</label><input type="email" id="accEmail" placeholder="voce@clinica.com" /></div>
         <div><label class="fld" for="accPhone">Telefone</label><input type="tel" id="accPhone" placeholder="(11) 90000-0000" /></div>
       </div>
+      <div class="row" style="margin-top:12px">
+        <div><label class="fld" for="apiKey">Chave da API (Groq · gsk_...)</label><input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" /></div>
+      </div>
+      <p class="hint" style="margin-top:8px">A chave da Groq (gratuita) processa o prontuário e fica guardada na sua conta, sincronizando em qualquer computador.</p>
       <button class="btn btn-primary" style="margin-top:14px" onclick="saveAccount()">Salvar dados</button>
+      <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
     </div>
 
     <div class="surface">
@@ -384,16 +389,6 @@
         <button id="tplCancel" class="btn btn-ghost" onclick="cancelEdit()" style="display:none">Cancelar edição</button>
       </div>
       <div style="margin-top:20px" id="tplList"></div>
-    </div>
-
-    <div class="surface">
-      <div class="block-title">Configuração do organizador (API Groq)</div>
-      <p class="hint">O processamento do prontuário usa a API da Groq (gratuita). Cole sua chave (gsk_...) — ela fica salva apenas neste navegador e é usada direto do cliente.</p>
-      <div class="row">
-        <div><label class="fld" for="apiKey">Chave da Groq (gsk_...)</label><input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" /></div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="saveCfg()">Salvar configuração</button>
-      <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
     </div>
   </section>
 
@@ -900,13 +895,15 @@ function downloadOut(){const t=mdToPlain(lastOutput)||document.getElementById('s
 
 /* ===== Conta ===== */
 function loadAccount(){document.getElementById('accName').value=account.name||'';document.getElementById('accEmail').value=account.email||'';document.getElementById('accPhone').value=account.phone||'';}
+async function pushConta(){
+  if(!cloudOn())return true;
+  try{ const {error}=await sb.from('conta').upsert({id:'default',name:account.name,email:account.email,phone:account.phone,groq_key:store.get('cfg.key','')}); if(error)throw error; return true; }
+  catch(e){ toast('Erro ao salvar na nuvem: '+(e.message||e)); return false; }
+}
 async function saveAccount(){
   account={name:document.getElementById('accName').value.trim(),email:document.getElementById('accEmail').value.trim(),phone:document.getElementById('accPhone').value.trim()};
-  store.set('account.v1',account);renderSideProfile();
-  if(cloudOn()){
-    try{ const {error}=await sb.from('conta').upsert({id:'default',name:account.name,email:account.email,phone:account.phone}); if(error)throw error; }
-    catch(e){ toast('Erro ao salvar conta na nuvem: '+(e.message||e)); return; }
-  }
+  store.set('account.v1',account);store.set('cfg.key',document.getElementById('apiKey').value.trim());renderSideProfile();
+  if(!(await pushConta()))return;
   toast('Dados salvos');
 }
 async function loadAccountRemote(){
@@ -915,12 +912,14 @@ async function loadAccountRemote(){
     const {data,error}=await sb.from('conta').select('*').eq('id','default').maybeSingle();
     if(error||!data) return;
     account={name:data.name||'',email:data.email||'',phone:data.phone||''};
-    store.set('account.v1',account); loadAccount(); renderSideProfile();
+    store.set('account.v1',account);
+    if(data.groq_key){ store.set('cfg.key',data.groq_key); const k=document.getElementById('apiKey'); if(k)k.value=data.groq_key; }
+    loadAccount(); renderSideProfile();
   }catch(e){}
 }
 function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
 function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');}
-function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());toast('Configuração salva');}
+async function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());if(!(await pushConta()))return;toast('Configuração salva');}
 
 /* ===== Modelos (CRUD + edição) ===== */
 let editingId=null;
