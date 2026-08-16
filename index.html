@@ -990,10 +990,10 @@ async function callLLM(system,user){
   return (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||'').trim();
 }
 async function processProntuario(raw,tpl,exams){
-  const system='Você é um assistente médico que preenche modelos de prontuário de anamnese. Preencha o MODELO abaixo usando SOMENTE informações presentes na transcrição e nos EXAMES ANEXADOS (quando houver) — nunca invente dados clínicos. Incorpore os resultados dos exames anexados nas seções pertinentes do modelo (ex.: exames complementares/resultados). Siga as instruções escritas no modelo (textos entre parênteses e a linha "Formato:" quando existir). Preserve os títulos das seções iniciados por ## (Markdown) e escreva o conteúdo como texto corrido em parágrafos. IMPORTANTE: se uma seção não tiver NENHUMA informação na transcrição nem nos exames, OMITA a seção inteira (título e conteúdo) — NUNCA escreva "não há informações disponíveis", "não relatado" ou equivalentes; simplesmente não inclua a seção. Linguagem clínica e objetiva, em português do Brasil.';
+  const system='Você é um assistente médico que preenche modelos de prontuário de anamnese. Use como fonte APENAS a transcrição da consulta e os EXAMES ANEXADOS (quando houver) — não invente sintomas, diagnósticos ou dados que não estejam nessas fontes. SIGA as instruções escritas em cada seção do modelo (textos entre parênteses e a linha "Formato:"). Quando uma seção pedir ANÁLISE, CONCLUSÃO ou INTERPRETAÇÃO — por exemplo, listar resultados de exames e apontar os que estão FORA do valor de referência —, FAÇA essa análise a partir dos dados fornecidos: comparar um resultado com o valor de referência informado no próprio exame é interpretação permitida e esperada, NÃO é invenção. Nesses casos, liste os exames (nome, data e valor) e escreva a conclusão destacando os resultados alterados (acima ou abaixo da referência). Preserve os títulos das seções iniciados por ## (Markdown) e escreva em texto corrido/parágrafos. Se uma seção não tiver NENHUMA informação nas fontes, OMITA-a por completo — nunca escreva "não há informações" ou "não relatado". Linguagem clínica e objetiva, em português do Brasil.';
   let prompt='MODELO DE PRONTUÁRIO:\n"""\n'+tpl.conteudo+'\n"""\n\nTRANSCRIÇÃO DA CONSULTA:\n"""\n'+raw+'\n"""';
-  if(exams&&exams.trim()) prompt+='\n\nEXAMES ANEXADOS (resultados a considerar):\n"""\n'+exams.trim()+'\n"""';
-  prompt+='\n\nDevolva apenas o prontuário preenchido, omitindo completamente as seções sem informação.';
+  if(exams&&exams.trim()) prompt+='\n\nEXAMES ANEXADOS (o texto pode ter espaçamento irregular por vir de PDF; interprete os números com cuidado, comparando cada resultado ao seu valor de referência):\n"""\n'+exams.trim()+'\n"""';
+  prompt+='\n\nDevolva apenas o prontuário preenchido, seguindo as instruções de cada seção (inclusive as que pedem conclusão dos exames) e omitindo completamente as seções sem informação.';
   return await callLLM(system,prompt);
 }
 async function organize(){
@@ -1045,8 +1045,8 @@ async function handleFiles(input){
   }
 }
 async function extractPdfText(file){
-  const pdfjs=await import('https://esm.sh/pdfjs-dist@4.2.67');
-  try{ pdfjs.GlobalWorkerOptions.workerSrc='https://esm.sh/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs'; }catch(e){}
+  const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/build/pdf.min.mjs');
+  try{ pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs'; }catch(e){}
   const buf=await file.arrayBuffer();
   const pdf=await pdfjs.getDocument({data:buf}).promise;
   let out='';
