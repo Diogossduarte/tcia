@@ -198,8 +198,12 @@
   .secs span{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
   .hist-body{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
   .item.open .hist-body{display:block}
-  .hist-body h4{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
-  .hist-body pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.65;margin:0 0 14px;color:var(--ink)}
+  .hist-body h4{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0}
+  .hist-body pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.65;margin:0;color:var(--ink)}
+  .hist-block{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .hist-block-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+  .hist-block-actions{display:flex;gap:8px}
+  .btn.sm{padding:6px 12px;font-size:13px}
   .empty{border:1px dashed var(--line-2);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13.5px}
   .chip{font-size:11.5px;font-weight:600;color:var(--purple-deep);background:var(--purple-soft);padding:3px 9px;border-radius:999px}
 
@@ -373,8 +377,6 @@
         <span class="rte-div"></span>
         <button class="rte-b" title="Lista" onclick="fmt('insertUnorderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
         <button class="rte-b" title="Lista numerada" onclick="fmt('insertOrderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h12M9 12h12M9 18h12M4 5.5 5 5v3M4 18h2v-1H5v-.5h1M4 12h1.6L4 14v.5h2"/></svg></button>
-        <span class="rte-div"></span>
-        <button class="rte-b" title="Inserir link" onclick="addLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></button>
       </div>
       <div id="rawText" contenteditable="true" spellcheck="true" data-ph="A fala aparece aqui conforme a consulta acontece. Você pode editar, colar exames ou anexar arquivos antes de organizar."></div>
       <div id="attachList" class="attach-list"></div>
@@ -409,8 +411,6 @@
           <span class="rte-div"></span>
           <button class="rte-b" title="Lista" onclick="fmt('insertUnorderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
           <button class="rte-b" title="Lista numerada" onclick="fmt('insertOrderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h12M9 12h12M9 18h12M4 5.5 5 5v3M4 18h2v-1H5v-.5h1M4 12h1.6L4 14v.5h2"/></svg></button>
-          <span class="rte-div"></span>
-          <button class="rte-b" title="Inserir link" onclick="addLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></button>
         </div>
         <div id="sheetBody" class="sheet-body placeholder" contenteditable="true" spellcheck="true">O resultado organizado aparece aqui.</div>
       </div>
@@ -946,13 +946,45 @@ function renderHistory(){
       +'<div class="hist-body">'
       +'<div class="hist-proc"><select id="histTpl_'+h.id+'">'+tplOptionsHtml(favId())+'</select>'
       +'<button id="histBtn_'+h.id+'" class="btn btn-primary" onclick="processHistory(\''+h.id+'\')">Processar Prontuário</button></div>'
-      +(h.organized?'<h4>Prontuário</h4><div class="md-render">'+mdToHtml(h.organized)+'</div>':'')
-      +'<h4>Transcrição bruta</h4><pre>'+esc(h.raw)+'</pre>'
-      +'<button class="btn btn-ghost" onclick="copyText(\''+h.id+'\')">Copiar prontuário</button></div>';
+      +(h.organized?('<div class="hist-block"><div class="hist-block-head"><h4>Prontuário processado</h4><div class="hist-block-actions">'
+        +'<button class="btn btn-ghost sm" onclick="copyText(\''+h.id+'\')">Copiar</button>'
+        +'<button class="btn btn-ghost sm" onclick="downloadHistoryPdf(\''+h.id+'\')">Baixar PDF</button>'
+        +'</div></div><div class="md-render">'+mdToHtml(h.organized)+'</div></div>'):'')
+      +'<div class="hist-block"><div class="hist-block-head"><h4>Transcrição bruta</h4><div class="hist-block-actions">'
+      +'<button class="btn btn-ghost sm" onclick="copyRaw(\''+h.id+'\')">Copiar transcrição</button>'
+      +'</div></div><pre>'+esc(h.raw)+'</pre></div>'
+      +'</div>';
     wrap.appendChild(el);
   });
 }
 function copyText(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(mdToPlain(h.organized)||h.raw).then(()=>toast('Copiado'));}
+function copyRaw(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(h.raw||'').then(()=>toast('Transcrição copiada'));}
+async function downloadHistoryPdf(id){
+  const h=history.find(x=>x.id===id); if(!h||!h.organized){toast('Sem prontuário para baixar');return;}
+  toast('Gerando PDF…');
+  try{
+    const mod=await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm');
+    const jsPDF=mod.jsPDF||mod.default; const doc=new jsPDF({unit:'pt',format:'a4'});
+    const M=48, W=doc.internal.pageSize.getWidth()-M*2, PH=doc.internal.pageSize.getHeight()-M;
+    let y=M;
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Prontuário', M, y); y+=20;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120);
+    doc.text(String(h.template||'').slice(0,90)+'   •   '+fmtDate(h.date), M, y); y+=24; doc.setTextColor(25);
+    const lines=String(h.organized||'').split('\n');
+    for(const raw of lines){
+      const line=raw.replace(/\s+$/,'');
+      if(line.trim()===''){ y+=8; continue; }
+      let bold=false,size=11,text;
+      if(/^#{1,6}\s+/.test(line)){ bold=true; size=12.5; text=line.replace(/^#{1,6}\s+/,'').replace(/\*\*/g,''); if(y>M)y+=6; }
+      else if(/^\s*[-*]\s+/.test(line)){ text='•  '+line.replace(/^\s*[-*]\s+/,'').replace(/\*\*(.+?)\*\*/g,'$1'); }
+      else { text=line.replace(/\*\*(.+?)\*\*/g,'$1'); }
+      doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(size);
+      for(const wl of doc.splitTextToSize(text, W)){ if(y>PH){ doc.addPage(); y=M; } doc.text(wl, M, y); y+=size+4; }
+      if(bold) y+=2;
+    }
+    doc.save('prontuario-'+(h.date?h.date.slice(0,10):'consulta')+'.pdf');
+  }catch(e){ toast('Não consegui gerar o PDF: '+(e.message||e).split('\n')[0]); }
+}
 async function delHistory(id){
   if(!confirm('Excluir este registro do histórico?'))return;
   if(cloudOn()){ try{ const {error}=await sb.from('historico').delete().eq('id',id); if(error)throw error; }catch(e){ toast('Erro ao excluir na nuvem'); return; } }
