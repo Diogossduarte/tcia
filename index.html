@@ -975,7 +975,7 @@ async function setFavorite(id){
 let lastOutput='';
 function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textContent=text||'O resultado organizado aparece aqui.';b.classList.toggle('placeholder',!!ph||!text);}
 function renderSheetMd(md){lastOutput=md;const b=document.getElementById('sheetBody');b.innerHTML=mdToHtml(md);b.classList.remove('placeholder');}
-const GROQ_MODEL='llama-3.3-70b-versatile';
+const GROQ_MODEL='openai/gpt-oss-120b';
 async function callLLM(system,user){
   const key=store.get('cfg.key','');
   if(!key){const e=new Error('Chave da Groq não configurada em Minha conta.');e.code='no-key';throw e;}
