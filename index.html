@@ -1218,7 +1218,6 @@ async function processHistory(id){
   const h=history.find(x=>x.id===id); if(!h)return;
   const sel=document.getElementById('histTpl_'+id); const tpl=sel?templates.find(t=>t.id===sel.value):null;
   if(!tpl){toast('Selecione um modelo');return;}
-  if(!store.get('cfg.key','')){toast('Configure a chave da Groq em Minha conta');showPage('account');return;}
   const btn=document.getElementById('histBtn_'+id); if(btn){btn.disabled=true;btn.textContent='Processando…';}
   try{
     const out=await processProntuario(h.raw,tpl);
@@ -1307,22 +1306,26 @@ function setSheet(text,ph){const b=document.getElementById('sheetBody');b.textCo
 function renderSheetMd(md){lastOutput=md;const b=document.getElementById('sheetBody');b.innerHTML=mdToHtml(md);b.classList.remove('placeholder');}
 const GROQ_MODEL='openai/gpt-oss-120b';
 async function callLLM(system,user,maxTokens){
-  const key=store.get('cfg.key','');
-  if(!key){const e=new Error('Chave da Groq não configurada em Minha conta.');e.code='no-key';throw e;}
-  const doCall=async(mt)=>{
-    try{
-      return await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
-        headers:{'content-type':'application/json','authorization':'Bearer '+key},
-        body:JSON.stringify({model:GROQ_MODEL,temperature:0.2,max_tokens:mt,messages:[{role:'system',content:system},{role:'user',content:user}]})});
-    }catch(e){ throw new Error('Falha de rede/CORS: a Groq pode não permitir chamada direta do navegador. Nesse caso é preciso um proxy.'); }
-  };
-  let res=await doCall(maxTokens||4000);
-  if(res.status===413||res.status===429){ try{ res=await doCall(2000); }catch(e){} }
-  if(!res.ok){ let d=''; try{d=await res.text();}catch(e){}
-    if(res.status===413||res.status===429) throw new Error('Limite gratuito da Groq atingido (tokens por minuto). O exame anexado é grande — remova anexos, reduza o texto, ou aguarde 1 minuto e tente de novo.');
-    throw new Error('Erro na API ('+res.status+'). Verifique a chave e o modelo.'+(d?'\n'+d:'')); }
+  if(!sb||!currentUser){ throw new Error('Faça login para processar.'); }
+  const { data:{ session } }=await sb.auth.getSession();
+  const token=session&&session.access_token;
+  if(!token){ throw new Error('Sessão expirada. Saia e entre novamente.'); }
+  let res;
+  try{
+    res=await fetch('https://mzbhgdnejzgeilvaryue.supabase.co/functions/v1/processar',{
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'authorization':'Bearer '+token },
+      body:JSON.stringify({ system, prompt:user, max_tokens:maxTokens||4000 })
+    });
+  }catch(e){ throw new Error('Falha de rede ao chamar o servidor.'); }
+  if(!res.ok){
+    let d=''; try{ const j=await res.json(); d=j.error||j.detail||JSON.stringify(j); }catch(e){ try{d=await res.text();}catch(_){} }
+    if(res.status===401) throw new Error('Sessão expirada. Saia e entre novamente.');
+    if(res.status===413||res.status===429) throw new Error('Limite da IA atingido no momento. Reduza anexos ou tente novamente em instantes.');
+    throw new Error('Erro no servidor ('+res.status+'). '+(d||''));
+  }
   const data=await res.json();
-  return (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||'').trim();
+  return (data.text||'').trim();
 }
 function trimExams(text){
   const lines=String(text||'').split('\n'); const count={};
@@ -1344,7 +1347,6 @@ async function organize(){
   const raw=getRaw(); if(!raw){toast('Nada para organizar — capte a consulta primeiro');return;}
   const tpl=templates.find(t=>t.id===document.getElementById('tplSelect').value); if(!tpl){toast('Selecione um modelo');return;}
   document.getElementById('sheetTitle').textContent=tpl.spec+' • '+tpl.name;
-  if(!store.get('cfg.key','')){setSheet('Configure sua chave da Groq em Minha conta › Configuração do organizador para habilitar a organização automática.',true);toast('Chave de API não configurada');return;}
   const btn=document.getElementById('btnOrg');btn.disabled=true;setSheet('Organizando…',true);
   try{ const exams=attachments.filter(a=>a.text&&a.text.trim()).map(a=>'['+a.name+']\n'+a.text.trim()).join('\n\n'); const out=await processProntuario(raw,tpl,exams); if(out){ renderSheetMd(out); } else { setSheet('Sem resposta do modelo.',false); } }
   catch(e){ setSheet(e.message,false); }
