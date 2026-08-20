@@ -579,9 +579,6 @@
           <div><label class="fld" for="accEmail">E-mail</label><input type="email" id="accEmail" placeholder="voce@clinica.com" /></div>
           <div><label class="fld" for="accPhone">Telefone</label><input type="tel" id="accPhone" placeholder="(11) 90000-0000" /></div>
         </div>
-        <div class="row" style="margin-top:12px">
-          <div><label class="fld" for="apiKey">Chave da API (Groq · gsk_...)</label><input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" /></div>
-        </div>
         <div class="fld-row">
           <div><label class="fld" style="margin:0">Você é médico(a)?</label></div>
           <div class="seg2"><button id="medSim" type="button" onclick="setMedico(true)">Sim</button><button id="medNao" type="button" class="on" onclick="setMedico(false)">Não</button></div>
@@ -593,7 +590,7 @@
               <option>Médico(a)</option><option>Enfermeiro(a)</option><option>Psicólogo(a)</option><option>Nutricionista</option><option>Fisioterapeuta</option><option>Secretário(a)</option><option>Administrador(a)</option><option>Outro</option>
             </select></div>
         </div>
-        <p class="hint" style="margin-top:8px">A chave da Groq processa o prontuário e fica guardada na sua conta, sincronizando em qualquer computador.</p>
+        <p class="hint" style="margin-top:8px">A inteligência artificial que estrutura o prontuário é fornecida pela plataforma — você não precisa configurar nenhuma chave.</p>
         <button class="btn btn-primary" style="margin-top:14px" onclick="saveAccount()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;vertical-align:-3px"><path d="M5 4h11l3 3v13H5zM8 4v5h7"/></svg> Salvar alterações</button>
         <div class="note"><b>Dados de saúde (LGPD):</b> o texto é enviado à API para ser estruturado. Avalie anonimização/consentimento antes de usar com pacientes reais.</div>
       </div>
@@ -1158,18 +1155,27 @@ async function finishOnlineRec(){
   if(await saveToHistory(dur)){ savedSession=true; }
   resetTimer();
 }
+function blobToBase64(blob){ return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>{ const s=String(r.result||''); const i=s.indexOf(','); resolve(i>=0?s.slice(i+1):s); }; r.onerror=reject; r.readAsDataURL(blob); }); }
 async function transcribeSegs(blob){
-  const key=store.get('cfg.key',''); if(!key) throw new Error('Configure a chave da Groq em Minha conta');
-  const form=new FormData();
-  form.append('file',blob,'audio.webm');
-  form.append('model','whisper-large-v3');
-  form.append('language','pt');
-  form.append('response_format','verbose_json');
-  const res=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'authorization':'Bearer '+key},body:form});
-  if(!res.ok){ let d=''; try{d=await res.text();}catch(e){} throw new Error('Erro na transcrição ('+res.status+') '+d); }
+  if(!sb||!currentUser) throw new Error('Faça login para transcrever.');
+  const { data:{ session } }=await sb.auth.getSession();
+  const token=session&&session.access_token;
+  if(!token) throw new Error('Sessão expirada. Saia e entre novamente.');
+  const b64=await blobToBase64(blob);
+  let res;
+  try{
+    res=await fetch('https://mzbhgdnejzgeilvaryue.supabase.co/functions/v1/transcrever',{
+      method:'POST',
+      headers:{ 'content-type':'application/json','authorization':'Bearer '+token },
+      body:JSON.stringify({ audio_base64:b64, mime:blob.type||'audio/webm', language:'pt' })
+    });
+  }catch(e){ throw new Error('Falha de rede ao transcrever.'); }
+  if(!res.ok){ let d=''; try{ const j=await res.json(); d=j.error||j.detail||''; }catch(e){}
+    if(res.status===413) throw new Error('Áudio muito grande para transcrever de uma vez (consulta muito longa). Vamos precisar da via de arquivos grandes.');
+    if(res.status===401) throw new Error('Sessão expirada. Saia e entre novamente.');
+    throw new Error('Erro ao transcrever ('+res.status+') '+d); }
   const data=await res.json();
-  if(Array.isArray(data.segments)) return data.segments.map(s=>({start:s.start||0,text:(s.text||'').trim()})).filter(s=>s.text);
-  return data.text?[{start:0,text:data.text.trim()}]:[];
+  return data.segments||[];
 }
 function mergeDialogue(med,pac){
   const all=[];
@@ -1424,14 +1430,14 @@ async function lookupCep(){
 }
 async function pushConta(){
   if(!sb||!currentUser)return true;
-  try{ const {error}=await sb.from('conta').upsert({user_id:currentUser.id,name:account.name,email:currentUser.email,phone:account.phone,groq_key:store.get('cfg.key',''),is_medico:account.isMedico,ocupacao:account.ocupacao,cep:account.cep,logradouro:account.logradouro,numero:account.numero,complemento:account.complemento,bairro:account.bairro,cidade:account.cidade,uf:account.uf},{onConflict:'user_id'}); if(error)throw error; return true; }
+  try{ const {error}=await sb.from('conta').upsert({user_id:currentUser.id,name:account.name,email:currentUser.email,phone:account.phone,is_medico:account.isMedico,ocupacao:account.ocupacao,cep:account.cep,logradouro:account.logradouro,numero:account.numero,complemento:account.complemento,bairro:account.bairro,cidade:account.cidade,uf:account.uf},{onConflict:'user_id'}); if(error)throw error; return true; }
   catch(e){ toast('Erro ao salvar na nuvem: '+(e.message||e)); return false; }
 }
 async function saveAccount(){
   const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   account={name:gv('accName'),email:gv('accEmail'),phone:gv('accPhone'),isMedico:accMedico,ocupacao:gv('accOcup'),
     cep:gv('accCep'),logradouro:gv('accLograd'),numero:gv('accNum'),complemento:gv('accCompl'),bairro:gv('accBairro'),cidade:gv('accCidade'),uf:gv('accUf')};
-  store.set('account.v1',account);store.set('cfg.key',gv('apiKey'));renderSideProfile();renderAccAvatar();
+  store.set('account.v1',account);renderSideProfile();renderAccAvatar();
   if(!(await pushConta()))return;
   toast('Dados salvos');
 }
@@ -1441,13 +1447,13 @@ async function loadAccountRemote(){
     const {data,error}=await sb.from('conta').select('*').maybeSingle();
     if(error||!data) { loadAccount(); renderSideProfile(); return; }
     account={name:data.name||account.name||'',email:currentUser.email||'',phone:data.phone||'',isMedico:!!data.is_medico,ocupacao:data.ocupacao||'',cep:data.cep||'',logradouro:data.logradouro||'',numero:data.numero||'',complemento:data.complemento||'',bairro:data.bairro||'',cidade:data.cidade||'',uf:data.uf||''};
-    if(data.groq_key){ store.set('cfg.key',data.groq_key); const k=document.getElementById('apiKey'); if(k)k.value=data.groq_key; }
+    
     loadAccount(); renderSideProfile();
   }catch(e){}
 }
 function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
-function loadCfg(){document.getElementById('apiKey').value=store.get('cfg.key','');}
-async function saveCfg(){store.set('cfg.key',document.getElementById('apiKey').value.trim());if(!(await pushConta()))return;toast('Configuração salva');}
+function loadCfg(){var k=document.getElementById('apiKey');if(k)k.value=store.get('cfg.key','');}
+async function saveCfg(){var k=document.getElementById('apiKey');if(k)store.set('cfg.key',k.value.trim());if(!(await pushConta()))return;toast('Configuração salva');}
 
 /* ===== Modelos (CRUD + edição) ===== */
 let editingId=null;
