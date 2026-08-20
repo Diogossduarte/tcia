@@ -249,6 +249,16 @@
   .seg2 button.on{background:var(--panel);color:var(--purple-deep);box-shadow:var(--shadow)}
   .link-btn{color:var(--purple-deep);font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap}
   .link-btn:hover{text-decoration:underline}
+  .admin-cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+  .admin-card{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:4px}
+  .admin-card .ac-num{font-size:28px;font-weight:800;color:var(--navy,#0E3A52);font-variant-numeric:tabular-nums}
+  .admin-card .ac-lbl{font-size:12.5px;color:var(--muted)}
+  .admin-table-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .admin-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+  .admin-table th,.admin-table td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .admin-table th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-2);font-weight:700}
+  .admin-table tbody tr:last-child td{border-bottom:none}
+  .admin-table td{color:var(--ink);font-variant-numeric:tabular-nums}
   .btn-danger{background:var(--rec);color:#fff}
   .btn-danger:hover{background:#D13A3F}
   .del-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -437,6 +447,7 @@
   <nav class="nav">
     <button id="nav-transc" class="active" onclick="showPage('transc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Transcrição</button>
     <button id="nav-hist" onclick="showPage('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 0 2-4.6"/><path d="M12 8v4l3 2"/></svg> Histórico</button>
+    <button id="nav-admin" onclick="showPage('admin')" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg> Admin</button>
   </nav>
 
   <div class="spacer"></div>
@@ -557,6 +568,11 @@
   </section>
 
   <!-- PAGE: MINHA CONTA -->
+  <section id="page-admin" style="display:none">
+    <div class="page-head"><div><h1>Admin · Uso por médico</h1><p>Métricas de consumo da plataforma. Visível apenas para administradores.</p></div><button class="btn btn-ghost" onclick="loadAdminMetrics()">Atualizar</button></div>
+    <div id="adminBody"><div class="empty">Carregando…</div></div>
+  </section>
+
   <section id="page-account" style="display:none">
     <div class="page-head"><div><h1>Configurações</h1><p>Seus dados, seu acesso e como o aplicativo se comporta para você.</p></div></div>
 
@@ -832,7 +848,28 @@ async function enterApp(user){
   renderSideProfile(); applyAdminUI();
 }
 async function loadProfile(){ isAdmin=false; try{ const {data}=await sb.from('profiles').select('role').eq('id',currentUser.id).maybeSingle(); if(data&&data.role==='admin')isAdmin=true; }catch(e){} }
-function applyAdminUI(){ const g=document.getElementById('tplGlobalRow'); if(g)g.style.display=isAdmin?'':'none'; }
+function applyAdminUI(){ const g=document.getElementById('tplGlobalRow'); if(g)g.style.display=isAdmin?'':'none'; const na=document.getElementById('nav-admin'); if(na)na.style.display=isAdmin?'':'none'; }
+async function loadAdminMetrics(){
+  const wrap=document.getElementById('adminBody'); if(!wrap)return;
+  wrap.innerHTML='<div class="empty">Carregando…</div>';
+  try{
+    const { data:{ session } }=await sb.auth.getSession(); const token=session&&session.access_token;
+    const res=await fetch('https://mzbhgdnejzgeilvaryue.supabase.co/functions/v1/admin-metrics',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+token},body:'{}'});
+    if(!res.ok){ let d=''; try{const j=await res.json();d=j.error||'';}catch(e){} wrap.innerHTML='<div class="empty">Erro ao carregar ('+res.status+') '+esc(d)+'</div>'; return; }
+    const data=await res.json(); const r=data.resumo||{};
+    let html='<div class="admin-cards">'
+      +'<div class="admin-card"><span class="ac-num">'+(r.medicos||0)+'</span><span class="ac-lbl">Médicos</span></div>'
+      +'<div class="admin-card"><span class="ac-num">'+(r.total_processamentos||0)+'</span><span class="ac-lbl">Processamentos (total)</span></div>'
+      +'<div class="admin-card"><span class="ac-num">'+(r.no_mes||0)+'</span><span class="ac-lbl">No mês atual</span></div>'
+      +'</div>';
+    const rows=data.rows||[];
+    if(!rows.length){ wrap.innerHTML=html+'<div class="empty">Nenhum uso registrado ainda.</div>'; return; }
+    html+='<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Médico</th><th>Total</th><th>Textos</th><th>Áudios</th><th>No mês</th><th>Cadastro</th></tr></thead><tbody>';
+    rows.forEach(row=>{ html+='<tr><td>'+esc(row.email||'—')+(row.role==='admin'?' <span class="favtag">admin</span>':'')+'</td><td>'+row.total+'</td><td>'+row.textos+'</td><td>'+row.audios+'</td><td>'+row.mes+'</td><td>'+(row.created_at?new Date(row.created_at).toLocaleDateString('pt-BR'):'—')+'</td></tr>'; });
+    html+='</tbody></table></div>';
+    wrap.innerHTML=html;
+  }catch(e){ wrap.innerHTML='<div class="empty">Falha ao carregar métricas.</div>'; }
+}
 async function loadFavorites(){ favIds=new Set(); try{ const {data}=await sb.from('favoritos').select('modelo_id'); (data||[]).forEach(r=>favIds.add(r.modelo_id)); }catch(e){} }
 function isFav(id){ return favIds.has(id); }
 async function logout(){ if(!confirm('Deseja sair?'))return; finishToIdle(); try{await sb.auth.signOut();}catch(e){} currentUser=null; isAdmin=false; templates=[]; history=[]; account={name:'',email:'',phone:''}; showAuth(); toast('Sessão encerrada'); }
@@ -848,7 +885,7 @@ async function loadTemplatesRemote(){
 function saveHistory(){store.set('hist.v1',history);}
 
 /* ===== Navegação ===== */
-const PAGES={transc:'page-transc',hist:'page-hist',account:'page-account'};
+const PAGES={transc:'page-transc',hist:'page-hist',account:'page-account',admin:'page-admin'};
 function toggleProfileMenu(e){ if(e)e.stopPropagation(); document.getElementById('profileMenu').classList.toggle('open'); }
 function closeProfileMenu(){ const m=document.getElementById('profileMenu'); if(m)m.classList.remove('open'); }
 document.addEventListener('click',(e)=>{ if(!e.target.closest('.profile-wrap'))closeProfileMenu(); });
@@ -879,8 +916,9 @@ async function deleteAccount(){
 }
 function showPage(p){
   Object.entries(PAGES).forEach(([k,id])=>document.getElementById(id).style.display=k===p?'':'none');
-  ['transc','hist'].forEach(k=>document.getElementById('nav-'+k).classList.toggle('active',k===p));
+  ['transc','hist','admin'].forEach(k=>{const n=document.getElementById('nav-'+k); if(n)n.classList.toggle('active',k===p);});
   if(p==='hist')renderHistory();
+  if(p==='admin')loadAdminMetrics();
   if(p==='account'){renderTemplates();loadAccount();loadCfg();renderAccAvatar();showSettingsTab('conta');}
   document.querySelector('.main').scrollTo(0,0);
   closeNav();
