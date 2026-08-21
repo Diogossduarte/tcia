@@ -135,7 +135,7 @@
   .rec-btns .btn{justify-content:center;border-radius:999px;padding:9px 15px}
   .rec-state{}
 
-  #rawText{min-height:300px;margin-top:10px;font-size:14.5px;line-height:1.7;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--panel);overflow-y:auto;white-space:pre-wrap}
+  #rawText{min-height:max(360px,calc(100vh - 350px));margin-top:10px;font-size:14.5px;line-height:1.7;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--panel);overflow-y:auto;white-space:pre-wrap}
   #rawText:focus{outline:none;border-color:var(--purple)}
   #rawText:empty:before{content:attr(data-ph);color:var(--muted-2)}
   .attach-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
@@ -714,7 +714,6 @@
         <div style="display:flex;gap:4px">
           <button class="icon-btn" title="Copiar" onclick="copyOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
           <button class="icon-btn" title="Baixar PDF" onclick="downloadProntPdf()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h6"/></svg></button>
-          <button class="icon-btn" title="Baixar .txt" onclick="downloadOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
         </div>
       </div>
       <div class="rte-bar">
@@ -1326,31 +1325,9 @@ function renderHistory(){
 }
 function copyText(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(mdToPlain(h.organized)||h.raw).then(()=>toast('Copiado'));}
 function copyRaw(id){const h=history.find(x=>x.id===id);if(!h)return;navigator.clipboard.writeText(h.raw||'').then(()=>toast('Transcrição copiada'));}
-async function downloadHistoryPdf(id){
+function downloadHistoryPdf(id){
   const h=history.find(x=>x.id===id); if(!h||!h.organized){toast('Sem prontuário para baixar');return;}
-  toast('Gerando PDF…');
-  try{
-    const mod=await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm');
-    const jsPDF=mod.jsPDF||mod.default; const doc=new jsPDF({unit:'pt',format:'a4'});
-    const M=48, W=doc.internal.pageSize.getWidth()-M*2, PH=doc.internal.pageSize.getHeight()-M;
-    let y=M;
-    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Prontuário', M, y); y+=20;
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120);
-    doc.text(String(h.template||'').slice(0,90)+'   •   '+fmtDate(h.date), M, y); y+=24; doc.setTextColor(25);
-    const lines=String(h.organized||'').split('\n');
-    for(const raw of lines){
-      const line=raw.replace(/\s+$/,'');
-      if(line.trim()===''){ y+=8; continue; }
-      let bold=false,size=11,text;
-      if(/^#{1,6}\s+/.test(line)){ bold=true; size=12.5; text=line.replace(/^#{1,6}\s+/,'').replace(/\*\*/g,''); if(y>M)y+=6; }
-      else if(/^\s*[-*]\s+/.test(line)){ text='•  '+line.replace(/^\s*[-*]\s+/,'').replace(/\*\*(.+?)\*\*/g,'$1'); }
-      else { text=line.replace(/\*\*(.+?)\*\*/g,'$1'); }
-      doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(size);
-      for(const wl of doc.splitTextToSize(text, W)){ if(y>PH){ doc.addPage(); y=M; } doc.text(wl, M, y); y+=size+4; }
-      if(bold) y+=2;
-    }
-    doc.save('prontuario-'+(h.date?h.date.slice(0,10):'consulta')+'.pdf');
-  }catch(e){ toast('Não consegui gerar o PDF: '+(e.message||e).split('\n')[0]); }
+  printProntuario(h.organized, (h.template||'')+'  •  '+fmtDate(h.date));
 }
 async function delHistory(id){
   if(!confirm('Excluir este registro do histórico?'))return;
@@ -1579,26 +1556,31 @@ function openProntModal(){
   document.getElementById('prontModal').style.display='flex';
 }
 function closeProntModal(){ document.getElementById('prontModal').style.display='none'; }
-async function downloadProntPdf(){
-  const txt=(lastOutput||'').trim(); if(!txt){ toast('Processe o prontuário primeiro.'); return; }
-  toast('Gerando PDF…');
-  try{
-    const mod=await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm');
-    const jsPDF=mod.jsPDF||mod.default; const doc=new jsPDF({unit:'pt',format:'a4'});
-    const M=48, W=doc.internal.pageSize.getWidth()-M*2, PH=doc.internal.pageSize.getHeight()-M; let y=M;
-    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Prontuário', M, y); y+=24;
-    for(const raw of txt.split('\n')){
-      const line=raw.replace(/\s+$/,''); if(line.trim()===''){ y+=8; continue; }
-      let bold=false,size=11,text;
-      if(/^#{1,6}\s+/.test(line)){ bold=true; size=12.5; text=line.replace(/^#{1,6}\s+/,'').replace(/\*\*/g,''); if(y>M)y+=6; }
-      else if(/^\s*[-*]\s+/.test(line)){ text='•  '+line.replace(/^\s*[-*]\s+/,'').replace(/\*\*(.+?)\*\*/g,'$1'); }
-      else { text=line.replace(/\*\*(.+?)\*\*/g,'$1'); }
-      doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(size);
-      for(const wl of doc.splitTextToSize(text, W)){ if(y>PH){ doc.addPage(); y=M; } doc.text(wl, M, y); y+=size+4; }
-      if(bold) y+=2;
-    }
-    doc.save('prontuario-'+new Date().toISOString().slice(0,10)+'.pdf');
-  }catch(e){ toast('Não consegui gerar o PDF: '+(e.message||e).split('\n')[0]); }
+function _pdfEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function prontToHtml(md){
+  const lines=String(md||'').split('\n'); let html=''; let inList=false;
+  for(const raw of lines){
+    const line=raw.replace(/\s+$/,'');
+    if(!line.trim()){ if(inList){html+='</ul>';inList=false;} continue; }
+    if(/^#{1,6}\s+/.test(line)){ if(inList){html+='</ul>';inList=false;} html+='<h2>'+_pdfEsc(line.replace(/^#{1,6}\s+/,'').replace(/:\s*$/,''))+'</h2>'; }
+    else if(/^\s*[-*]\s+/.test(line)){ if(!inList){html+='<ul>';inList=true;} html+='<li>'+_pdfEsc(line.replace(/^\s*[-*]\s+/,'')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</li>'; }
+    else { if(inList){html+='</ul>';inList=false;} html+='<p>'+_pdfEsc(line).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>'; }
+  }
+  if(inList)html+='</ul>';
+  return html;
+}
+function printProntuario(md, subtitle){
+  const body=prontToHtml(md);
+  const w=window.open('','_blank');
+  if(!w){ toast('Permita pop-ups para gerar o PDF.'); return; }
+  const sub=subtitle?'<div class="sub">'+_pdfEsc(subtitle)+'</div>':'';
+  w.document.write('<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Prontuário</title><style>@page{margin:2cm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#14181f;font-size:12pt;line-height:1.5;margin:0}h1{font-size:19pt;margin:0 0 4px}.sub{color:#666;font-size:10pt;margin:0 0 16px}h2{font-size:13pt;margin:16px 0 4px;color:#0E3A52}p{margin:0 0 8px;text-align:justify}ul{margin:0 0 8px 20px;padding:0}li{margin:3px 0}</style></head><body><h1>Prontuário</h1>'+sub+body+'</body></html>');
+  w.document.close(); w.focus();
+  setTimeout(()=>{ try{ w.print(); }catch(e){} }, 350);
+}
+function downloadProntPdf(){
+  const md=(lastOutput||'').trim(); if(!md){ toast('Processe o prontuário primeiro.'); return; }
+  printProntuario(md, '');
 }
 function openTplModal(id){
   fillSpecDatalist();
