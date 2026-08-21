@@ -120,23 +120,20 @@
   .btn:disabled{opacity:.4;cursor:not-allowed}
 
   /* record panel */
-  .rec-panel{display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg,var(--panel),var(--bg));border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:2px}
+  .rec-panel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(180deg,var(--panel),var(--bg));border:1px solid var(--line);border-radius:14px;padding:11px 15px;margin-top:2px}
   .rec-head{display:flex;align-items:center;gap:12px}
-  .rec-head .rec-state{margin-left:auto}
   .rec-mid{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-  .rec-mid .rec-btns{flex:1;min-width:280px}
-  .rec-top{display:flex;align-items:center;gap:16px}
   .rec-timer-wrap{display:flex;flex-direction:column;gap:4px}
   .timer-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2)}
-  .timer{font-family:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;font-size:33px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1;color:var(--ink)}
+  .timer{font-family:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1;color:var(--ink)}
   .rec-state{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:6px 13px;border-radius:999px}
   .rec-state .dot{width:8px;height:8px;border-radius:50%;background:var(--muted-2)}
   .rec-state.live{color:var(--rec);border-color:rgba(229,72,77,.3)}.rec-state.live .dot{background:var(--rec);animation:pulse 1.1s infinite}
   .rec-state.paused{color:var(--amber);border-color:rgba(217,138,0,.3)}.rec-state.paused .dot{background:var(--amber)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-  .rec-btns{display:flex;gap:10px}
-  .rec-btns .btn{flex:1;justify-content:center;border-radius:999px;padding:11px 14px}
-  .rec-state{margin-left:auto}
+  .rec-btns{display:flex;gap:8px;margin-left:auto}
+  .rec-btns .btn{justify-content:center;border-radius:999px;padding:9px 15px}
+  .rec-state{}
 
   #rawText{min-height:300px;margin-top:10px;font-size:14.5px;line-height:1.7;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--panel);overflow-y:auto;white-space:pre-wrap}
   #rawText:focus{outline:none;border-color:var(--purple)}
@@ -485,20 +482,13 @@
     <div class="transc-grid">
     <div class="surface">
       <div class="rec-panel">
-        <div class="rec-head">
-          <span id="modeBadge" class="mode-badge pres">Consulta presencial</span>
-          <div class="rec-state" id="recState"><span class="dot"></span><span id="recStateText">Parado</span></div>
-        </div>
-        <div class="rec-mid">
-          <div class="rec-timer-wrap">
-            <span class="timer-label">Tempo de sessão</span>
-            <div class="timer" id="timer">00:00</div>
-          </div>
-          <div class="rec-btns">
-            <button id="btnStart" class="btn btn-start" onclick="startRec()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg> Iniciar</button>
-            <button id="btnPause" class="btn btn-pause" onclick="togglePause()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar</button>
-            <button id="btnFinish" class="btn btn-finish" onclick="askFinish()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Finalizar</button>
-          </div>
+        <span id="modeBadge" class="mode-badge pres">Consulta presencial</span>
+        <div class="timer" id="timer">00:00</div>
+        <div class="rec-state" id="recState"><span class="dot"></span><span id="recStateText">Parado</span></div>
+        <div class="rec-btns">
+          <button id="btnStart" class="btn btn-start" onclick="startRec()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg> Iniciar</button>
+          <button id="btnPause" class="btn btn-pause" onclick="togglePause()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg> Pausar</button>
+          <button id="btnFinish" class="btn btn-finish" onclick="askFinish()" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Finalizar</button>
         </div>
       </div>
 
@@ -524,39 +514,8 @@
       </div>
       <div id="rawText" contenteditable="true" spellcheck="true" data-ph="A fala aparece aqui conforme a consulta acontece. Você pode editar, colar exames ou anexar arquivos antes de organizar."></div>
       <div id="attachList" class="attach-list"></div>
-    </div>
-
-    <div class="surface">
-      <div class="block-title"><span class="n">2</span> Prontuário</div>
-      <p class="hint">Escolha o modelo e estruture o texto captado nas seções da anamnese.</p>
-      <div class="row">
-        <div><label class="fld" for="tplSelect">Modelo de anamnese</label><select id="tplSelect"></select></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button id="btnOrg" class="btn btn-primary" onclick="organize()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Processar Prontuário</button></div>
-      </div>
-
-      <div class="sheet" style="margin-top:18px">
-        <div class="sheet-head"><b id="sheetTitle">Prontuário organizado</b>
-          <div style="display:flex;gap:4px">
-            <button class="icon-btn" title="Copiar" onclick="copyOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
-            <button class="icon-btn" title="Baixar .txt" onclick="downloadOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
-          </div>
-        </div>
-        <div class="rte-bar">
-          <button class="rte-b" title="Diminuir fonte" onclick="decFont()">A−</button>
-          <button class="rte-b" title="Aumentar fonte" onclick="incFont()">A+</button>
-          <span class="rte-div"></span>
-          <button class="rte-b" title="Negrito" onclick="fmt('bold')"><b>B</b></button>
-          <button class="rte-b" title="Itálico" onclick="fmt('italic')"><i>I</i></button>
-          <button class="rte-b" title="Sublinhado" onclick="fmt('underline')"><span style="text-decoration:underline">U</span></button>
-          <span class="rte-div"></span>
-          <button class="rte-b" title="Alinhar à esquerda" onclick="fmt('justifyLeft')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M4 12h10M4 18h13"/></svg></button>
-          <button class="rte-b" title="Centralizar" onclick="fmt('justifyCenter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M7 12h10M5 18h14"/></svg></button>
-          <button class="rte-b" title="Alinhar à direita" onclick="fmt('justifyRight')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M10 12h10M7 18h13"/></svg></button>
-          <span class="rte-div"></span>
-          <button class="rte-b" title="Lista" onclick="fmt('insertUnorderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
-          <button class="rte-b" title="Lista numerada" onclick="fmt('insertOrderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h12M9 12h12M9 18h12M4 5.5 5 5v3M4 18h2v-1H5v-.5h1M4 12h1.6L4 14v.5h2"/></svg></button>
-        </div>
-        <div id="sheetBody" class="sheet-body placeholder" contenteditable="true" spellcheck="true">O resultado organizado aparece aqui.</div>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="openProntModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Processar Prontuário</button>
       </div>
     </div>
     </div>
@@ -737,6 +696,45 @@
   <button class="rbtn" title="Janela flutuante (sempre no topo)" onclick="openPiP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></svg></button>
   <button class="rbtn" id="recBarPause" title="Pausar / Retomar" onclick="togglePause()"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg></button>
   <button class="rbtn" title="Finalizar" onclick="askFinish()"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+</div>
+
+<!-- ===== MODAL: PROCESSAR PRONTUÁRIO ===== -->
+<div id="prontModal" class="modal-overlay" onclick="if(event.target===this)closeProntModal()">
+  <div class="modal" style="max-width:780px">
+    <div class="modal-head">
+      <div class="mh-title" style="font-size:18px">Processar Prontuário</div>
+      <button class="modal-x" onclick="closeProntModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="row">
+      <div><label class="fld" for="tplSelect">Modelo de anamnese</label><select id="tplSelect"></select></div>
+      <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button id="btnOrg" class="btn btn-primary" onclick="organize()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Processar</button></div>
+    </div>
+    <div class="sheet" style="margin-top:18px">
+      <div class="sheet-head"><b id="sheetTitle">Prontuário organizado</b>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" title="Copiar" onclick="copyOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+          <button class="icon-btn" title="Baixar PDF" onclick="downloadProntPdf()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h6"/></svg></button>
+          <button class="icon-btn" title="Baixar .txt" onclick="downloadOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
+        </div>
+      </div>
+      <div class="rte-bar">
+        <button class="rte-b" title="Diminuir fonte" onclick="decFont()">A−</button>
+        <button class="rte-b" title="Aumentar fonte" onclick="incFont()">A+</button>
+        <span class="rte-div"></span>
+        <button class="rte-b" title="Negrito" onclick="fmt('bold')"><b>B</b></button>
+        <button class="rte-b" title="Itálico" onclick="fmt('italic')"><i>I</i></button>
+        <button class="rte-b" title="Sublinhado" onclick="fmt('underline')"><span style="text-decoration:underline">U</span></button>
+        <span class="rte-div"></span>
+        <button class="rte-b" title="Alinhar à esquerda" onclick="fmt('justifyLeft')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M4 12h10M4 18h13"/></svg></button>
+        <button class="rte-b" title="Centralizar" onclick="fmt('justifyCenter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M7 12h10M5 18h14"/></svg></button>
+        <button class="rte-b" title="Alinhar à direita" onclick="fmt('justifyRight')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M10 12h10M7 18h13"/></svg></button>
+        <span class="rte-div"></span>
+        <button class="rte-b" title="Lista" onclick="fmt('insertUnorderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
+        <button class="rte-b" title="Lista numerada" onclick="fmt('insertOrderedList')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h12M9 12h12M9 18h12M4 5.5 5 5v3M4 18h2v-1H5v-.5h1M4 12h1.6L4 14v.5h2"/></svg></button>
+      </div>
+      <div id="sheetBody" class="sheet-body placeholder" contenteditable="true" spellcheck="true">O resultado organizado aparece aqui.</div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== MODAL: EDITAR/NOVO MODELO ===== -->
@@ -1574,6 +1572,33 @@ async function submitTemplate(){
     }
     closeTplModal(); await loadTemplatesRemote();
   }catch(e){ toast('Erro ao salvar: '+(e.message||e)); }
+}
+function openProntModal(){
+  if(!getRaw()){ toast('Não há texto captado para processar.'); return; }
+  fillTplSelect();
+  document.getElementById('prontModal').style.display='flex';
+}
+function closeProntModal(){ document.getElementById('prontModal').style.display='none'; }
+async function downloadProntPdf(){
+  const txt=(lastOutput||'').trim(); if(!txt){ toast('Processe o prontuário primeiro.'); return; }
+  toast('Gerando PDF…');
+  try{
+    const mod=await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm');
+    const jsPDF=mod.jsPDF||mod.default; const doc=new jsPDF({unit:'pt',format:'a4'});
+    const M=48, W=doc.internal.pageSize.getWidth()-M*2, PH=doc.internal.pageSize.getHeight()-M; let y=M;
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Prontuário', M, y); y+=24;
+    for(const raw of txt.split('\n')){
+      const line=raw.replace(/\s+$/,''); if(line.trim()===''){ y+=8; continue; }
+      let bold=false,size=11,text;
+      if(/^#{1,6}\s+/.test(line)){ bold=true; size=12.5; text=line.replace(/^#{1,6}\s+/,'').replace(/\*\*/g,''); if(y>M)y+=6; }
+      else if(/^\s*[-*]\s+/.test(line)){ text='•  '+line.replace(/^\s*[-*]\s+/,'').replace(/\*\*(.+?)\*\*/g,'$1'); }
+      else { text=line.replace(/\*\*(.+?)\*\*/g,'$1'); }
+      doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(size);
+      for(const wl of doc.splitTextToSize(text, W)){ if(y>PH){ doc.addPage(); y=M; } doc.text(wl, M, y); y+=size+4; }
+      if(bold) y+=2;
+    }
+    doc.save('prontuario-'+new Date().toISOString().slice(0,10)+'.pdf');
+  }catch(e){ toast('Não consegui gerar o PDF: '+(e.message||e).split('\n')[0]); }
 }
 function openTplModal(id){
   fillSpecDatalist();
