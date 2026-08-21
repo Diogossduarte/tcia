@@ -274,7 +274,8 @@
   .settings-tabs button{flex:1;all:unset;text-align:center;cursor:pointer;padding:10px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
   .settings-tabs button.active{background:var(--bg);color:var(--purple-deep)}
   .profile-photo{display:flex;align-items:center;gap:16px;margin-top:6px}
-  .avatar-lg{width:64px;height:64px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700;font-size:24px;flex:0 0 auto}
+  .avatar-lg{width:64px;height:64px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700;font-size:24px;flex:0 0 auto;overflow:hidden}
+  .avatar-lg img,.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
   .plan-card{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:6px;flex-wrap:wrap}
   .plan-name{font-weight:700;font-size:18px;color:var(--navy,#0E3A52)}
   .plan-price{font-weight:800;font-size:26px;color:var(--navy,#0E3A52)}
@@ -588,12 +589,19 @@
         <p class="hint">Confira ou altere os dados pessoais da sua conta.</p>
         <div class="profile-photo">
           <div class="avatar-lg" id="accAvatar">D</div>
-          <div><b>Foto de perfil</b><br><span class="hint" style="margin:0">Sua foto de perfil na plataforma</span></div>
+          <div>
+            <b>Foto de perfil</b><br><span class="hint" style="margin:0">JPG ou PNG. Fica melhor quadrada.</span>
+            <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-ghost sm" onclick="document.getElementById('avatarInput').click()">Alterar foto</button>
+              <button class="btn btn-ghost sm" id="avatarRemoveBtn" onclick="removeAvatar()" style="display:none">Remover</button>
+            </div>
+            <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="onAvatarFile(this)" />
+          </div>
         </div>
         <div class="row" style="margin-top:18px">
           <div><label class="fld" for="accName">Nome</label><input type="text" id="accName" placeholder="Ex.: Dra. Ana Prado" /></div>
           <div><label class="fld" for="accEmail">E-mail</label><input type="email" id="accEmail" placeholder="voce@clinica.com" /></div>
-          <div><label class="fld" for="accPhone">Telefone</label><input type="tel" id="accPhone" placeholder="(11) 90000-0000" /></div>
+          <div><label class="fld" for="accPhone">Celular</label><input type="tel" id="accPhone" inputmode="numeric" placeholder="(11) 90000-0000" oninput="maskPhone(this)" maxlength="16" /></div>
         </div>
         <div class="fld-row">
           <div><label class="fld" style="margin:0">Você é médico(a)?</label></div>
@@ -890,7 +898,25 @@ function toggleProfileMenu(e){ if(e)e.stopPropagation(); document.getElementById
 function closeProfileMenu(){ const m=document.getElementById('profileMenu'); if(m)m.classList.remove('open'); }
 document.addEventListener('click',(e)=>{ if(!e.target.closest('.profile-wrap'))closeProfileMenu(); });
 function showSettingsTab(t){ ['conta','plano','modelos'].forEach(k=>{const el=document.getElementById('tab-'+k); if(el)el.style.display=k===t?'':'none';}); document.querySelectorAll('.settings-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t)); if(t==='modelos')renderTemplates(); }
-function renderAccAvatar(){ const a=document.getElementById('accAvatar'); if(a)a.textContent=account.name?initials(account.name):'—'; }
+function renderAccAvatar(){
+  const a=document.getElementById('accAvatar'); if(!a)return;
+  if(account.avatar){ a.innerHTML='<img src="'+account.avatar+'" alt="">'; } else { a.textContent=account.name?initials(account.name):'—'; }
+  const rb=document.getElementById('avatarRemoveBtn'); if(rb)rb.style.display=account.avatar?'':'none';
+}
+function resizeImage(file,size){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{ try{ const s=Math.min(img.width,img.height); const sx=(img.width-s)/2, sy=(img.height-s)/2; const c=document.createElement('canvas'); c.width=size; c.height=size; c.getContext('2d').drawImage(img,sx,sy,s,s,0,0,size,size); resolve(c.toDataURL('image/jpeg',0.85)); }catch(e){reject(e);} };
+    img.onerror=reject; img.src=URL.createObjectURL(file);
+  });
+}
+async function onAvatarFile(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f)return; if(!f.type.startsWith('image/')){ toast('Selecione uma imagem.'); return; }
+  try{ account.avatar=await resizeImage(f,160); renderAccAvatar(); renderSideProfile(); if(await pushConta())toast('Foto atualizada'); }
+  catch(e){ toast('Não consegui processar a imagem.'); }
+}
+async function removeAvatar(){ account.avatar=''; renderAccAvatar(); renderSideProfile(); if(await pushConta())toast('Foto removida'); }
 function setTheme(t){ store.set('theme',t); applyTheme(); }
 function applyTheme(){
   const t=store.get('theme','light');
@@ -924,7 +950,7 @@ function showPage(p){
   closeNav();
 }
 async function newConsult(){ await archiveCurrent(); showPage('transc'); clearSession(); document.getElementById('rawText').focus(); }
-function logout(){ if(confirm('Deseja sair? A transcrição atual não salva será perdida.')){finishToIdle();clearSession();toast('Sessão encerrada');} }
+function logout_legacy_removed(){}
 
 /* ===== Microfone + Web Speech ===== */
 let currentStream=null, recognition=null, recState='idle', finalText='', savedSession=false;
@@ -1449,9 +1475,17 @@ function downloadOut(){const b=document.getElementById('sheetBody');const t=(b.c
 /* ===== Conta ===== */
 let accMedico=false;
 function setMedico(v){ accMedico=!!v; const s=document.getElementById('medSim'),n=document.getElementById('medNao'); if(s)s.classList.toggle('on',accMedico); if(n)n.classList.toggle('on',!accMedico); }
+function maskPhone(el){
+  let v=(el.value||'').replace(/\D/g,'').slice(0,11);
+  if(v.length<=2){ el.value=v.length?('('+v):v; return; }
+  if(v.length<=6){ el.value='('+v.slice(0,2)+') '+v.slice(2); return; }
+  if(v.length<=10){ el.value='('+v.slice(0,2)+') '+v.slice(2,6)+'-'+v.slice(6); return; }
+  el.value='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+}
 function _sv(id,v){ const el=document.getElementById(id); if(el)el.value=v||''; }
 function loadAccount(){
   _sv('accName',account.name); _sv('accEmail',account.email); _sv('accPhone',account.phone);
+  const _p=document.getElementById('accPhone'); if(_p)maskPhone(_p);
   setMedico(!!account.isMedico); _sv('accOcup',account.ocupacao);
   _sv('accCep',account.cep); _sv('accLograd',account.logradouro); _sv('accNum',account.numero); _sv('accCompl',account.complemento);
   _sv('accBairro',account.bairro); _sv('accCidade',account.cidade); _sv('accUf',account.uf);
@@ -1468,12 +1502,13 @@ async function lookupCep(){
 }
 async function pushConta(){
   if(!sb||!currentUser)return true;
-  try{ const {error}=await sb.from('conta').upsert({user_id:currentUser.id,name:account.name,email:currentUser.email,phone:account.phone,is_medico:account.isMedico,ocupacao:account.ocupacao,cep:account.cep,logradouro:account.logradouro,numero:account.numero,complemento:account.complemento,bairro:account.bairro,cidade:account.cidade,uf:account.uf},{onConflict:'user_id'}); if(error)throw error; return true; }
+  try{ const {error}=await sb.from('conta').upsert({user_id:currentUser.id,name:account.name,email:currentUser.email,phone:account.phone,avatar:account.avatar||'',is_medico:account.isMedico,ocupacao:account.ocupacao,cep:account.cep,logradouro:account.logradouro,numero:account.numero,complemento:account.complemento,bairro:account.bairro,cidade:account.cidade,uf:account.uf},{onConflict:'user_id'}); if(error)throw error; return true; }
   catch(e){ toast('Erro ao salvar na nuvem: '+(e.message||e)); return false; }
 }
 async function saveAccount(){
   const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
-  account={name:gv('accName'),email:gv('accEmail'),phone:gv('accPhone'),isMedico:accMedico,ocupacao:gv('accOcup'),
+  const _av=account.avatar||'';
+  account={name:gv('accName'),email:gv('accEmail'),phone:gv('accPhone'),isMedico:accMedico,ocupacao:gv('accOcup'),avatar:_av,
     cep:gv('accCep'),logradouro:gv('accLograd'),numero:gv('accNum'),complemento:gv('accCompl'),bairro:gv('accBairro'),cidade:gv('accCidade'),uf:gv('accUf')};
   store.set('account.v1',account);renderSideProfile();renderAccAvatar();
   if(!(await pushConta()))return;
@@ -1484,12 +1519,12 @@ async function loadAccountRemote(){
   try{
     const {data,error}=await sb.from('conta').select('*').maybeSingle();
     if(error||!data) { loadAccount(); renderSideProfile(); return; }
-    account={name:data.name||account.name||'',email:currentUser.email||'',phone:data.phone||'',isMedico:!!data.is_medico,ocupacao:data.ocupacao||'',cep:data.cep||'',logradouro:data.logradouro||'',numero:data.numero||'',complemento:data.complemento||'',bairro:data.bairro||'',cidade:data.cidade||'',uf:data.uf||''};
+    account={name:data.name||account.name||'',email:currentUser.email||'',phone:data.phone||'',avatar:data.avatar||'',isMedico:!!data.is_medico,ocupacao:data.ocupacao||'',cep:data.cep||'',logradouro:data.logradouro||'',numero:data.numero||'',complemento:data.complemento||'',bairro:data.bairro||'',cidade:data.cidade||'',uf:data.uf||''};
     
     loadAccount(); renderSideProfile();
   }catch(e){}
 }
-function renderSideProfile(){document.getElementById('sideAvatar').textContent=account.name?initials(account.name):'AN';document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
+function renderSideProfile(){const sa=document.getElementById('sideAvatar');if(sa){if(account.avatar)sa.innerHTML='<img src="'+account.avatar+'" alt="">';else sa.textContent=account.name?initials(account.name):'AN';}document.getElementById('sideName').textContent=account.name||'Minha conta';document.getElementById('sideEmail').textContent=account.email||'Ver dados';}
 function loadCfg(){var k=document.getElementById('apiKey');if(k)k.value=store.get('cfg.key','');}
 async function saveCfg(){var k=document.getElementById('apiKey');if(k)store.set('cfg.key',k.value.trim());if(!(await pushConta()))return;toast('Configuração salva');}
 
@@ -1509,7 +1544,8 @@ function renderTemplates(){
       const heads=(t.conteudo.match(/^##\s*(.+)$/gm)||[]).map(h=>h.replace(/^##\s*/,'').replace(/:\s*$/,''));
       const fav=isFav(t.id); const canEdit = !t.is_global || isAdmin;
       const gtag = t.is_global ? ' <span class="favtag" style="color:#0E6E86;background:#DDF3F7">Da plataforma</span>' : '';
-      let actions='<button class="icon-btn'+(fav?' fav':'')+'" title="Favoritar" onclick="setFavorite(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="'+(fav?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.9 1-5.8L3.5 9.2l5.9-.9z"/></svg></button>';
+      let actions='<button class="icon-btn'+(fav?' fav':'')+'" title="Favoritar" onclick="setFavorite(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="'+(fav?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.9 1-5.8L3.5 9.2l5.9-.9z"/></svg></button>'
+        +'<button class="icon-btn" title="Criar cópia deste modelo" onclick="duplicateTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
       if(canEdit){ actions+='<button class="icon-btn" title="Editar" onclick="editTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg></button>'
         +'<button class="icon-btn danger" title="Excluir" onclick="delTemplate(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7"/></svg></button>'; }
       el.innerHTML='<div class="item-top"><div class="item-lead"><div class="ava t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></div><div class="txt"><b>'+esc(t.name)+(fav?' <span class="favtag">★ favorito</span>':'')+gtag+'</b><small>'+heads.length+' seções</small></div></div>'
@@ -1546,6 +1582,16 @@ function openTplModal(id){
 }
 function closeTplModal(){ document.getElementById('tplModal').style.display='none'; editingId=null; }
 function editTemplate(id){ openTplModal(id); }
+function duplicateTemplate(id){
+  const t=templates.find(x=>x.id===id); if(!t)return;
+  openTplModal();
+  document.getElementById('tplModalTitle').textContent='Novo modelo (cópia)';
+  document.getElementById('fSpec').value=t.spec;
+  document.getElementById('fName').value=t.name+' (cópia)';
+  document.getElementById('fConteudo').value=t.conteudo||'';
+  const g=document.getElementById('fGlobal'); if(g)g.checked=false;
+  const nm=document.getElementById('fName'); nm.focus(); nm.select();
+}
 function cancelEdit(){ closeTplModal(); }
 async function delTemplate(id){
   if(!confirm('Excluir este modelo?'))return;
